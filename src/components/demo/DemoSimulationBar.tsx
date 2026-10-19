@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import {
-  SlidersHorizontal,
-  ChevronUp,
-  ChevronDown,
+  Settings,
   Sparkles,
+  ChevronDown,
+  X,
   Users,
   CheckCircle,
   RotateCcw,
   Crown,
   FileCheck,
+  AlertTriangle,
 } from 'lucide-react';
 import { useCivic } from '../../context/CivicContext';
 import { DEMO_USERS } from '../../data/mockData';
@@ -40,150 +41,155 @@ export const DemoSimulationBar: React.FC = () => {
   const targetComplaint = targetComplaintKey ? complaintDocs[targetComplaintKey] : null;
 
   return (
-    <div className="demo-toolbar-floating">
-      <div className="demo-toolbar-header" onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Sparkles size={16} color="#38bdf8" />
-          <span>Dev Simulation Panel (Thresholds & Tests)</span>
-        </div>
-        <button style={{ color: '#94a3b8' }}>
-          {isOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-        </button>
-      </div>
+    <>
+      {/* Collapsible Floating Trigger Button (Section 16: Never obscuring UI) */}
+      <button
+        className="dev-tools-fab-button"
+        onClick={() => setIsOpen(!isOpen)}
+        title="Open Developer Simulation Tools (Demo Only)"
+        aria-label="Developer Simulation Tools"
+      >
+        <Settings size={15} className={isOpen ? 'spin-anim' : ''} />
+        <span>Dev Tools</span>
+        <span className="dev-tools-mini-badge">DEMO</span>
+      </button>
 
+      {/* Popover Card (Displayed only when expanded) */}
       {isOpen && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Active Target State */}
-          <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: 1.4 }}>
-            Target: <strong>{targetIncident?.reference}</strong> ({targetIncident?.counts.uniqueContributors} contributors)
-            {targetRoom && ` · Room: ${targetRoom.memberCount} members`}
-          </div>
-
-          {/* Test 6: 50 Contributors Threshold Simulator */}
-          <div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#e2e8f0', marginBottom: '4px' }}>
-              1. Incident Contributors (50 Threshold → Open Room)
+        <div className="dev-tools-popover-card">
+          <div className="dev-tools-card-header">
+            <div className="dev-tools-header-left">
+              <span className="dev-tag-badge">DEMO / DEV ONLY</span>
+              <span className="dev-header-title">Threshold Simulator</span>
             </div>
-            <div className="demo-btn-group">
-              {[5, 19, 42, 49, 50].map((num) => (
-                <button
-                  key={num}
-                  className="btn-demo-action"
-                  onClick={() => {
-                    if (targetIncident) {
-                      simulateContributors(targetIncident.id, num);
-                    }
-                  }}
-                >
-                  Set {num} {num === 50 ? '🎉 (Trigger Room)' : ''}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Test 7: 100 Room Members Threshold Simulator */}
-          <div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#e2e8f0', marginBottom: '4px' }}>
-              2. Room Members (100 Threshold → Signature Campaign)
-            </div>
-            <div className="demo-btn-group">
-              {[50, 75, 99, 100].map((num) => (
-                <button
-                  key={num}
-                  className="btn-demo-action"
-                  disabled={!targetRoom}
-                  style={{ opacity: targetRoom ? 1 : 0.4 }}
-                  onClick={() => {
-                    if (targetRoom) {
-                      simulateRoomMembers(targetRoom.id, num);
-                    } else {
-                      alert('Trigger 50 contributors first to open an incident room!');
-                    }
-                  }}
-                >
-                  Set {num} Members {num === 100 ? '🚀 (Start Campaign)' : ''}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Test 8 & 9: Signatures & Leader Approval */}
-          <div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#e2e8f0', marginBottom: '4px' }}>
-              3. Signatures & Leader Approval Workflow
-            </div>
-            <div className="demo-btn-group">
-              <button
-                className="btn-demo-action"
-                disabled={!targetCampaign}
-                style={{ opacity: targetCampaign ? 1 : 0.4 }}
-                onClick={() => {
-                  if (targetCampaign) {
-                    simulateAllSignatures(targetCampaign.id);
-                  }
-                }}
-              >
-                ✓ Complete 100 Signatures
-              </button>
-
-              <button
-                className="btn-demo-action"
-                disabled={!targetComplaint}
-                style={{ opacity: targetComplaint ? 1 : 0.4 }}
-                onClick={() => {
-                  if (targetComplaint) {
-                    switchUser('user-ananya');
-                    setActiveView('leader_approval');
-                  }
-                }}
-              >
-                👑 Jump to Leader Approval
-              </button>
-            </div>
-          </div>
-
-          {/* Persona Switcher */}
-          <div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#e2e8f0', marginBottom: '4px' }}>
-              4. Active Persona: <span style={{ color: '#38bdf8' }}>{currentUser.name}</span>
-            </div>
-            <div className="demo-btn-group">
-              {DEMO_USERS.map((u) => (
-                <button
-                  key={u.id}
-                  className="btn-demo-action"
-                  style={{
-                    backgroundColor: currentUser.id === u.id ? '#0284c7' : '#1e293b',
-                    color: currentUser.id === u.id ? '#fff' : '#cbd5e1',
-                  }}
-                  onClick={() => switchUser(u.id)}
-                >
-                  {u.name} ({u.role === 'community_leader' ? 'Leader' : 'Resident'})
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Reset */}
-          <div style={{ borderTop: '1px solid #334155', paddingTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
             <button
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                color: '#f87171',
-                fontSize: '11px',
-                fontWeight: 600,
-              }}
-              onClick={resetAllDemoData}
+              className="dev-tools-close-btn"
+              onClick={() => setIsOpen(false)}
+              title="Close Dev Panel"
             >
-              <RotateCcw size={13} />
-              <span>Reset State to Figma Baseline</span>
+              <X size={15} />
             </button>
-            <span style={{ fontSize: '10px', color: '#64748b' }}>Phase 2 Prototype</span>
+          </div>
+
+          <div className="dev-tools-card-body">
+            {/* Target Info */}
+            <div className="dev-target-meta">
+              Target: <strong>{targetIncident?.reference}</strong> ({targetIncident?.counts.uniqueContributors} contributors)
+              {targetRoom && ` · Room: ${targetRoom.memberCount} members`}
+            </div>
+
+            {/* Test 6: 50 Contributors Threshold */}
+            <div className="dev-section-group">
+              <div className="dev-section-label">
+                1. 50 Contributors (Unlocks Incident Room)
+              </div>
+              <div className="dev-btn-row">
+                {[5, 19, 42, 49, 50].map((num) => (
+                  <button
+                    key={num}
+                    className="dev-action-pill"
+                    onClick={() => {
+                      if (targetIncident) {
+                        simulateContributors(targetIncident.id, num);
+                      }
+                    }}
+                  >
+                    Set {num} {num === 50 ? '🎉 (Trigger)' : ''}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Test 7: 100 Room Members Threshold */}
+            <div className="dev-section-group">
+              <div className="dev-section-label">
+                2. 100 Members (Unlocks Signature Campaign)
+              </div>
+              <div className="dev-btn-row">
+                {[50, 75, 99, 100].map((num) => (
+                  <button
+                    key={num}
+                    className="dev-action-pill"
+                    disabled={!targetRoom}
+                    style={{ opacity: targetRoom ? 1 : 0.4 }}
+                    onClick={() => {
+                      if (targetRoom) {
+                        simulateRoomMembers(targetRoom.id, num);
+                      } else {
+                        alert('Trigger 50 contributors first to open an incident room!');
+                      }
+                    }}
+                  >
+                    Set {num} {num === 100 ? '🚀 (Start)' : ''}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Test 8 & 9: Signatures & Leader Approval */}
+            <div className="dev-section-group">
+              <div className="dev-section-label">
+                3. Collective Complaint & Leader Approval
+              </div>
+              <div className="dev-btn-row">
+                <button
+                  className="dev-action-pill"
+                  disabled={!targetCampaign}
+                  style={{ opacity: targetCampaign ? 1 : 0.4 }}
+                  onClick={() => {
+                    if (targetCampaign) {
+                      simulateAllSignatures(targetCampaign.id);
+                    }
+                  }}
+                >
+                  ✓ Complete 100 Signatures
+                </button>
+
+                <button
+                  className="dev-action-pill"
+                  disabled={!targetComplaint}
+                  style={{ opacity: targetComplaint ? 1 : 0.4 }}
+                  onClick={() => {
+                    if (targetComplaint) {
+                      switchUser('user-ananya');
+                      setActiveView('leader_approval');
+                      setIsOpen(false);
+                    }
+                  }}
+                >
+                  👑 Leader Review Screen
+                </button>
+              </div>
+            </div>
+
+            {/* Switch Persona */}
+            <div className="dev-section-group">
+              <div className="dev-section-label">
+                4. Active Persona: <span style={{ color: '#38bdf8' }}>{currentUser.name}</span>
+              </div>
+              <div className="dev-btn-row">
+                {DEMO_USERS.map((u) => (
+                  <button
+                    key={u.id}
+                    className={`dev-action-pill ${currentUser.id === u.id ? 'active' : ''}`}
+                    onClick={() => switchUser(u.id)}
+                  >
+                    {u.name} ({u.role === 'community_leader' ? 'Leader' : 'Resident'})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Reset */}
+            <div className="dev-tools-footer">
+              <button className="dev-reset-btn" onClick={resetAllDemoData}>
+                <RotateCcw size={13} />
+                <span>Reset Demo State to Baseline</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };

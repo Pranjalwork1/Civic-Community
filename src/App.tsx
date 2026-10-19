@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCivic } from './context/CivicContext';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
@@ -14,12 +14,11 @@ import { NotificationsView } from './components/notifications/NotificationsView'
 import { ConsolidationModal } from './components/incident/ConsolidationModal';
 import { DemoSimulationBar } from './components/demo/DemoSimulationBar';
 import { LocationSelectModal } from './components/common/LocationSelectModal';
-
-import { WindowHeaderBar } from './components/layout/WindowHeaderBar';
-import { FloatingSideWidgets } from './components/layout/FloatingSideWidgets';
+import { AiAssistantDrawer } from './components/common/AiAssistantDrawer';
 
 export const MainAppContent: React.FC = () => {
   const { activeView, isLocationModalOpen, setIsLocationModalOpen, selectedLocation } = useCivic();
+  const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
 
   // On first launch if no location is stored, open location selection modal
   React.useEffect(() => {
@@ -52,30 +51,31 @@ export const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="desktop-scenic-viewport">
-      {/* Scenic Backdrop Overlay for legibility & ambient depth */}
-      <div className="scenic-backdrop-overlay" />
+    <div className="civic-app-container">
+      {/* Sticky Full-Width Top Navigation */}
+      <Navbar />
 
-      {/* Outer Floating Companion Widgets on wide screens */}
-      <FloatingSideWidgets />
+      {/* Primary 3-Column Community Layout */}
+      <main className="main-layout">
+        <Sidebar />
+        {renderActiveView()}
+        <RightSidebar />
+      </main>
 
-      {/* Floating Rounded Application Workspace inspired by reference image */}
-      <div className="floating-workspace-window">
-        <WindowHeaderBar />
-        <Navbar />
-
-        <main className="main-layout">
-          <Sidebar />
-          {renderActiveView()}
-          <RightSidebar />
-        </main>
-      </div>
-
+      {/* Overlays & Drawers */}
       <ConsolidationModal />
       <LocationSelectModal
         isOpen={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
       />
+
+      {/* Subtle CivicSignal AI Assistant Trigger & Drawer */}
+      <AiAssistantDrawer
+        isOpen={isAiDrawerOpen}
+        onToggle={() => setIsAiDrawerOpen(!isAiDrawerOpen)}
+      />
+
+      {/* Collapsible Floating Dev Simulation Panel (Non-obtrusive) */}
       <DemoSimulationBar />
     </div>
   );

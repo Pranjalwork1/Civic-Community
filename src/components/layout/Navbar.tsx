@@ -61,23 +61,22 @@ export const Navbar: React.FC = () => {
         </button>
       </div>
 
-      {/* Center Search & Community Selector */}
+      {/* Center Search Field */}
       <div className="nav-center">
         <div className="search-input-wrap">
           <Search size={16} />
           <input
             type="text"
             className="search-input"
-            placeholder={
-              selectedLocation
-                ? `Search CivicSignal or c/${selectedLocation.locality}...`
-                : 'Search CivicSignal or choose location...'
-            }
+            placeholder="Search CivicSignal, communities, incidents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+      </div>
 
+      {/* Nav Actions (Right Section per Section 5) */}
+      <div className="nav-actions">
         {/* Dynamic Location / Community Selector */}
         <div style={{ position: 'relative' }}>
           <button
@@ -85,16 +84,16 @@ export const Navbar: React.FC = () => {
             onClick={() => setIsCommunityMenuOpen(!isCommunityMenuOpen)}
             title="Click to view or change your browsing neighborhood"
           >
-            <MapPin size={14} color={selectedLocation ? '#ff4500' : '#64748b'} />
+            <MapPin size={14} color={selectedLocation ? '#FF4D1A' : '#64748b'} />
             {selectedLocation ? (
               <>
-                <span className="community-pill-prefix">c/</span>
+                <span className="community-pill-prefix">📍</span>
                 <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {selectedLocation.locality}
                 </span>
               </>
             ) : (
-              <span style={{ color: '#64748b', fontWeight: 500 }}>Choose your location</span>
+              <span style={{ color: '#64748b', fontWeight: 500 }}>📍 Choose Location</span>
             )}
             <ChevronDown size={14} color="#64748b" />
           </button>
@@ -104,11 +103,9 @@ export const Navbar: React.FC = () => {
               style={{
                 position: 'absolute',
                 top: '100%',
-                left: 0,
+                right: 0,
                 marginTop: '6px',
                 width: '280px',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
                 backgroundColor: 'rgba(255, 255, 255, 0.98)',
                 borderRadius: '12px',
                 border: '1px solid rgba(226, 232, 240, 0.9)',
@@ -135,19 +132,19 @@ export const Navbar: React.FC = () => {
                   style={{
                     padding: '8px 10px',
                     borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 69, 0, 0.08)',
-                    border: '1px solid rgba(255, 69, 0, 0.2)',
+                    backgroundColor: 'rgba(255, 77, 26, 0.08)',
+                    border: '1px solid rgba(255, 77, 26, 0.2)',
                     marginBottom: '10px',
                   }}
                 >
-                  <div style={{ fontWeight: 700, fontSize: '13px', color: '#ff4500' }}>
-                    c/{selectedLocation.locality}
+                  <div style={{ fontWeight: 700, fontSize: '13px', color: '#FF4D1A' }}>
+                    {selectedLocation.locality}
                   </div>
                   <div style={{ fontSize: '11.5px', color: '#475569', marginTop: '2px' }}>
                     {selectedLocation.city} {selectedLocation.state ? `· ${selectedLocation.state}` : ''}
                   </div>
                   <div style={{ fontSize: '10.5px', color: '#94a3b8', marginTop: '4px' }}>
-                    {selectedLocation.lat.toFixed(4)}° N, {selectedLocation.lng.toFixed(4)}° E · {selectedLocation.accuracy || selectedLocation.source}
+                    {selectedLocation.lat.toFixed(4)}° N, {selectedLocation.lng.toFixed(4)}° E
                   </div>
                 </div>
               ) : (
@@ -182,7 +179,7 @@ export const Navbar: React.FC = () => {
                         fontSize: '11px',
                         fontWeight: 600,
                         borderRadius: '4px',
-                        backgroundColor: selectedRadiusKm === km ? '#0284c7' : '#f1f5f9',
+                        backgroundColor: selectedRadiusKm === km ? '#172033' : '#f1f5f9',
                         color: selectedRadiusKm === km ? '#fff' : '#475469',
                       }}
                     >
@@ -202,12 +199,12 @@ export const Navbar: React.FC = () => {
                   width: '100%',
                   padding: '8px',
                   borderRadius: '8px',
-                  backgroundColor: '#ff4500',
+                  backgroundColor: '#FF4D1A',
                   color: '#fff',
                   fontSize: '12px',
                   fontWeight: 600,
                   marginBottom: '6px',
-                  boxShadow: '0 2px 6px rgba(255, 69, 0, 0.25)',
+                  boxShadow: '0 2px 6px rgba(255, 77, 26, 0.25)',
                 }}
                 onClick={() => {
                   setIsCommunityMenuOpen(false);
@@ -220,10 +217,6 @@ export const Navbar: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Nav Actions */}
-      <div className="nav-actions">
         <button className="btn-primary-create" onClick={handleStartReport}>
           <PlusCircle size={16} />
           <span>Create</span>

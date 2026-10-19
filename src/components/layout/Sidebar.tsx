@@ -7,7 +7,6 @@ import {
   FileText,
   Bell,
   Bookmark,
-  LayoutGrid,
   ShieldAlert,
   Flame,
   Droplet,
@@ -15,6 +14,10 @@ import {
   Zap,
   HardHat,
   Search,
+  Users,
+  ChevronRight,
+  Shield,
+  LifeBuoy,
 } from 'lucide-react';
 import { useCivic } from '../../context/CivicContext';
 import { ISSUE_CATEGORIES } from '../../data/categories';
@@ -32,6 +35,7 @@ export const Sidebar: React.FC = () => {
     setIsLocationModalOpen,
     activeCategoryFilter,
     setActiveCategoryFilter,
+    currentUser,
   } = useCivic();
 
   const activeRoomsCount = rooms.length;
@@ -48,154 +52,172 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="left-sidebar">
-      <div className="sidebar-scrollable-content">
-        {/* Navigation Group 1: Feeds */}
-        <div className="sidebar-nav-group">
-          <div className="sidebar-group-title">FEEDS</div>
+    <aside className="left-sidebar" aria-label="Main Navigation">
+      {/* 1. CivicSignal Brand Logo */}
+      <div className="sidebar-brand-box">
+        <button
+          className="sidebar-brand-link"
+          onClick={() => {
+            setActiveCategoryFilter('all');
+            setActiveView('explore');
+          }}
+          title="CivicSignal Home"
+        >
+          <div className="sidebar-logo-icon">
+            <ShieldAlert size={18} />
+          </div>
+          <span className="sidebar-logo-text">CivicSignal</span>
+        </button>
+      </div>
+
+      <div className="sidebar-nav-scroll-area">
+        {/* 2. FEEDS */}
+        <div className="sidebar-nav-section">
+          <div className="sidebar-section-title">FEEDS</div>
+
           <button
-            className={`sidebar-nav-item ${activeView === 'explore' && activeCategoryFilter === 'all' ? 'active-pill' : ''}`}
+            className={`sidebar-nav-link ${activeView === 'explore' && activeCategoryFilter === 'all' ? 'active' : ''}`}
             onClick={() => {
               setActiveCategoryFilter('all');
               setActiveView('explore');
             }}
           >
-            <Compass size={17} />
-            <span className="nav-label">Home Feed</span>
-            <span className="nav-badge-pill">{incidents.length}</span>
+            <Compass size={17} className="sidebar-icon" />
+            <span className="sidebar-link-text">Home Feed</span>
+            <span className="sidebar-link-badge">{incidents.length}</span>
           </button>
 
           <button
-            className="sidebar-nav-item"
+            className="sidebar-nav-link"
             onClick={() => {
               setActiveCategoryFilter('all');
               setActiveView('explore');
             }}
           >
-            <MapPin size={17} />
-            <span className="nav-label">Nearby Radar</span>
+            <MapPin size={17} className="sidebar-icon" />
+            <span className="sidebar-link-text">Nearby Radar</span>
           </button>
 
           <button
-            className="sidebar-nav-item"
-            onClick={() => {
-              setActiveView('explore');
-            }}
+            className="sidebar-nav-link"
+            onClick={() => setActiveView('explore')}
           >
-            <BookmarkCheck size={17} />
-            <span className="nav-label">Following</span>
+            <BookmarkCheck size={17} className="sidebar-icon" />
+            <span className="sidebar-link-text">Following</span>
           </button>
         </div>
 
-        {/* Navigation Group 2: Civic Workspaces */}
-        <div className="sidebar-nav-group">
-          <div className="sidebar-group-title">CIVIC WORKSPACES</div>
+        {/* 3. CIVIC WORKSPACES */}
+        <div className="sidebar-nav-section">
+          <div className="sidebar-section-title">CIVIC WORKSPACES</div>
 
           <button
-            className={`sidebar-nav-item ${activeView === 'incident_room' ? 'active-pill' : ''}`}
+            className={`sidebar-nav-link ${activeView === 'incident_room' ? 'active' : ''}`}
             onClick={() => {
               if (rooms.length > 0) {
                 setActiveView('incident_room');
               } else {
-                alert('Incident Rooms unlock when 50 unique neighbors corroborate an issue! Try simulating 50 contributors on the BMSCE college gate pothole issue.');
+                alert('Incident Rooms unlock when 50 unique neighbors corroborate an issue! You can trigger this using Dev Tools at the bottom-right.');
               }
             }}
           >
-            <MessagesSquare size={17} />
-            <span className="nav-label">Incident Rooms</span>
-            {activeRoomsCount > 0 && <span className="nav-badge-count">{activeRoomsCount}</span>}
+            <MessagesSquare size={17} className="sidebar-icon" />
+            <span className="sidebar-link-text">Incident Rooms</span>
+            {activeRoomsCount > 0 && (
+              <span className="sidebar-link-badge room-badge">{activeRoomsCount}</span>
+            )}
           </button>
 
           <button
-            className={`sidebar-nav-item ${activeView === 'tracking' ? 'active-pill' : ''}`}
+            className={`sidebar-nav-link ${activeView === 'tracking' ? 'active' : ''}`}
             onClick={() => setActiveView('tracking')}
           >
-            <FileText size={17} />
-            <span className="nav-label">Petitions & Tracking</span>
+            <FileText size={17} className="sidebar-icon" />
+            <span className="sidebar-link-text">Petitions & Tracking</span>
           </button>
 
           <button
-            className={`sidebar-nav-item ${activeView === 'notifications' ? 'active-pill' : ''}`}
+            className={`sidebar-nav-link ${activeView === 'notifications' ? 'active' : ''}`}
             onClick={() => setActiveView('notifications')}
           >
-            <Bell size={17} />
-            <span className="nav-label">Notifications</span>
-            {unreadNotifsCount > 0 && <span className="nav-badge-count">{unreadNotifsCount}</span>}
+            <Bell size={17} className="sidebar-icon" />
+            <span className="sidebar-link-text">Notifications</span>
+            {unreadNotifsCount > 0 && (
+              <span className="sidebar-link-badge alert-badge">{unreadNotifsCount}</span>
+            )}
           </button>
 
           <button
-            className="sidebar-nav-item"
+            className="sidebar-nav-link"
             onClick={() => setActiveView('explore')}
           >
-            <Bookmark size={17} />
-            <span className="nav-label">Saved Reports</span>
+            <Bookmark size={17} className="sidebar-icon" />
+            <span className="sidebar-link-text">Saved Reports</span>
           </button>
         </div>
 
-        {/* Navigation Group 3: Civic Categories / Topics (Inspired by Reference Image Topics) */}
-        <div className="sidebar-nav-group">
-          <div className="sidebar-group-title">CIVIC TOPICS</div>
+        {/* 4. CIVIC TOPICS */}
+        <div className="sidebar-nav-section">
+          <div className="sidebar-section-title">CIVIC TOPICS</div>
 
-          {ISSUE_CATEGORIES.slice(0, 5).map((cat) => {
+          {ISSUE_CATEGORIES.slice(0, 7).map((cat) => {
             const count = getCategoryCount(cat.id);
             const isSelected = activeView === 'explore' && activeCategoryFilter === cat.id;
 
             return (
               <button
                 key={cat.id}
-                className={`sidebar-nav-item ${isSelected ? 'active-pill' : ''}`}
+                className={`sidebar-nav-link ${isSelected ? 'active' : ''}`}
                 onClick={() => {
                   setActiveCategoryFilter(cat.id);
                   setActiveView('explore');
                 }}
               >
-                <span className="category-emoji-dot">{cat.icon}</span>
-                <span className="nav-label">{cat.name}</span>
-                {count > 0 && <span className="nav-count-subtle">{count}</span>}
+                <span className="sidebar-topic-icon">{cat.icon}</span>
+                <span className="sidebar-link-text">{cat.name}</span>
+                {count > 0 && <span className="sidebar-topic-count">{count}</span>}
               </button>
             );
           })}
+        </div>
 
-          <button
-            className="sidebar-more-btn"
-            onClick={() => {
-              setActiveCategoryFilter('all');
-              setActiveView('explore');
-            }}
-          >
-            <span>••• All Categories</span>
-          </button>
+        {/* 5. CURRENT COMMUNITY */}
+        <div className="sidebar-community-box">
+          <div className="community-box-label">CURRENT COMMUNITY</div>
+          <div className="community-box-name">
+            {selectedLocation ? selectedLocation.locality : 'Knowledge Park III'}
+          </div>
+          <div className="community-box-city">
+            {selectedLocation ? selectedLocation.city : 'Greater Noida'}
+          </div>
+          <div className="community-box-actions">
+            <button
+              className="community-box-change-btn"
+              onClick={() => setIsLocationModalOpen(true)}
+            >
+              Change Location
+            </button>
+            <button
+              className="community-box-report-btn"
+              onClick={handleStartReport}
+            >
+              + Report Issue
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Selected Community Card (Sticky at bottom of sidebar) */}
-      <div className="sidebar-community-card">
-        <div className="community-card-top">
-          <div className="community-pill-locality">
-            c/{selectedLocation ? selectedLocation.locality : 'Basavanagudi'}
+      {/* 6. User Profile at Bottom (Section 4) */}
+      <div className="sidebar-bottom-profile">
+        <div className="bottom-profile-avatar">{currentUser.avatar}</div>
+        <div className="bottom-profile-info">
+          <div className="bottom-profile-name">{currentUser.name}</div>
+          <div className="bottom-profile-role">
+            {currentUser.role === 'community_leader'
+              ? 'Community Leader'
+              : 'Verified Resident'}
           </div>
-          <button
-            className="community-change-btn"
-            onClick={() => setIsLocationModalOpen(true)}
-            title="Change browsing neighborhood"
-          >
-            Change
-          </button>
         </div>
-
-        <div className="community-card-city">
-          {selectedLocation
-            ? `${selectedLocation.city} · ${selectedLocation.source === 'sample' ? 'Demo Area' : 'Selected Area'}`
-            : 'Bengaluru · Karnataka'}
-        </div>
-
-        <div className="community-quote">
-          "Your community. One voice. Real civic action."
-        </div>
-
-        <button className="sidebar-action-report-btn" onClick={handleStartReport}>
-          + Report an Issue
-        </button>
       </div>
     </aside>
   );
