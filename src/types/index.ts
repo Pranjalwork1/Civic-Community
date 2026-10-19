@@ -76,7 +76,8 @@ export interface EvidenceItem {
 }
 
 export interface CivicGestures {
-  witnessed: boolean;
+  witnessed: boolean; // "I Saw It"
+  didNotSee?: boolean; // "I Didn't See It" (Mutually exclusive with witnessed)
   affected: boolean;
   stillHappening: boolean;
   canHelp: boolean;
@@ -85,7 +86,8 @@ export interface CivicGestures {
 }
 
 export interface CivicCounts {
-  witnesses: number;
+  witnesses: number; // "I Saw It" count
+  didNotSeeCount?: number; // "I Didn't See It" count
   affected: number;
   evidenceItems: number;
   discussions: number;

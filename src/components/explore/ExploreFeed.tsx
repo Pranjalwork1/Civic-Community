@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Eye,
+  EyeOff,
   Users,
   Camera,
   MessageSquare,
@@ -15,6 +16,8 @@ import {
   PlusCircle,
   SlidersHorizontal,
   Compass,
+  ArrowRight,
+  ShieldAlert,
 } from 'lucide-react';
 import { useCivic } from '../../context/CivicContext';
 import { ISSUE_CATEGORIES } from '../../data/categories';
@@ -124,84 +127,146 @@ export const ExploreFeed: React.FC = () => {
 
   return (
     <div className="center-content">
-      {/* Explore Page Heading Box */}
-      <div className="explore-header-box">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-          <div className="explore-subbreadcrumb">
-            {selectedLocation
-              ? `c/${selectedLocation.locality.toUpperCase()} · ${selectedLocation.city.toUpperCase()}`
-              : 'CHOOSE LOCATION TO EXPLORE NEARBY FEED'}
+      {/* Community Hero Header (inspired by reference image top topic section) */}
+      <div className="community-hero-header">
+        <div className="hero-header-top">
+          <div>
+            <div className="hero-topic-subtitle">Community Workspace</div>
+            <h1 className="hero-topic-title">
+              {selectedLocation ? selectedLocation.locality : 'Civic Community Feed'}
+            </h1>
           </div>
-          {hasOnlyDemoRecords && (
-            <span
-              style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                backgroundColor: '#fef3c7',
-                color: '#92400e',
-                border: '1px solid #fde68a',
-                padding: '2px 8px',
-                borderRadius: '12px',
-              }}
+
+          <div className="hero-avatar-stack-wrap">
+            <div className="avatar-stack">
+              <div className="stack-avatar a1" title="Aditi Sharma (Leader)">AS</div>
+              <div className="stack-avatar a2" title="Rahul Mehta">RM</div>
+              <div className="stack-avatar a3" title="Kavita Iyer">KI</div>
+              <div className="stack-avatar-count" title="Active neighborhood contributors">
+                +{incidents.reduce((acc, curr) => acc + curr.counts.witnesses, 0) || 28}
+              </div>
+            </div>
+            <button
+              className="hero-report-btn"
+              onClick={handleStartReport}
+              title="Report a civic issue"
             >
-              Demo data active
+              <PlusCircle size={15} />
+              <span>Create Report</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="hero-tagline-bar">
+          <p className="hero-tagline-text">
+            {selectedLocation
+              ? `Your community in ${selectedLocation.locality}, ${selectedLocation.city}. One voice. Real civic action.`
+              : 'Your community. One voice. Real civic action.'}
+          </p>
+          {hasOnlyDemoRecords && (
+            <span className="demo-badge-pill">
+              Prototype Demonstration Data
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <h1 className="explore-main-title">Small observations. Real civic action.</h1>
-            <div className="explore-tagline">
-              {selectedLocation
-                ? `"Your community in ${selectedLocation.locality}. One voice. Real civic action."`
-                : '"Your community. One voice. Real civic action."'}
-            </div>
+
+        {/* Tab Pills & Pagination Controls (Matching reference image) */}
+        <div className="hero-nav-tabs-row">
+          <div className="hero-tab-pills">
+            {[
+              { id: 'for_you', label: 'For You' },
+              { id: 'nearby', label: 'Nearby' },
+              { id: 'unresolved', label: 'Unresolved' },
+              { id: 'recently_updated', label: 'Recently Updated' },
+              { id: 'resolved', label: 'Resolved' },
+              { id: 'communities', label: 'Communities' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                className={`hero-tab-pill ${activeFeedTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveFeedTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
-          <button className="btn-primary-create" onClick={handleStartReport}>
-            <PlusCircle size={16} />
-            <span>Create Report</span>
-          </button>
+
+          <div className="hero-pager-arrows">
+            <button
+              className="pager-arrow-btn"
+              onClick={() => {
+                const tabs = ['for_you', 'nearby', 'unresolved', 'recently_updated', 'resolved', 'communities'];
+                const idx = tabs.indexOf(activeFeedTab);
+                if (idx > 0) setActiveFeedTab(tabs[idx - 1]);
+              }}
+              title="Previous Feed"
+            >
+              ←
+            </button>
+            <button
+              className="pager-arrow-btn"
+              onClick={() => {
+                const tabs = ['for_you', 'nearby', 'unresolved', 'recently_updated', 'resolved', 'communities'];
+                const idx = tabs.indexOf(activeFeedTab);
+                if (idx < tabs.length - 1) setActiveFeedTab(tabs[idx + 1]);
+              }}
+              title="Next Feed"
+            >
+              →
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Quick Create Bar */}
+      {/* Featured Civic Highlight Banner (Matching panoramic hero card from reference image) */}
+      {sortedIncidents.length > 0 && activeFeedTab === 'for_you' && (
+        <div
+          className="featured-incident-banner"
+          onClick={() => handleOpenIncident(sortedIncidents[0])}
+        >
+          <div className="featured-banner-image-wrap">
+            <img
+              src={sortedIncidents[0].evidence[0]?.url || 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1000&auto=format&fit=crop&q=80'}
+              alt={sortedIncidents[0].title}
+              className="featured-banner-img"
+            />
+            <div className="featured-banner-overlay" />
+            <div className="featured-banner-top-badges">
+              <span className="featured-tag">
+                {sortedIncidents[0].severity === 'high' ? '⚠️ Urgent Community Signal' : '🔥 Top Corroborated Issue'}
+              </span>
+              <span className="featured-category-badge">
+                {sortedIncidents[0].category}
+              </span>
+            </div>
+            <div className="featured-banner-meta-bottom">
+              <h3 className="featured-banner-title">{sortedIncidents[0].title}</h3>
+              <p className="featured-banner-sub">
+                {sortedIncidents[0].landmark} · {sortedIncidents[0].counts.witnesses} residents corroborated · {sortedIncidents[0].counts.discussions} comments
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Civic Observation Composer Bar */}
       <div className="reddit-create-bar" onClick={handleStartReport}>
         <div className="create-bar-avatar">CS</div>
         <div className="create-bar-input">
           {selectedLocation
-            ? `What civic issue or hazard did you observe today in ${selectedLocation.locality}?`
-            : 'What civic issue or hazard did you observe today?'}
+            ? `Report an issue or hazard in ${selectedLocation.locality} (pothole, streetlight, wires, drainage)...`
+            : 'Report an issue or hazard (pothole, streetlight, wires, drainage)...'}
         </div>
         <div className="create-bar-actions">
           <div className="create-bar-btn">
-            <Camera size={15} color="#0284c7" />
-            <span>Photo</span>
+            <Camera size={15} color="#FF4D1A" />
+            <span>Camera</span>
           </div>
           <div className="create-bar-btn">
-            <MapPin size={15} color="#10b981" />
-            <span>Pin Location</span>
+            <MapPin size={15} color="#2878D0" />
+            <span>Geotag Pin</span>
           </div>
         </div>
-      </div>
-
-      {/* Feed Filters Tabs */}
-      <div className="feed-tabs-row">
-        {[
-          { id: 'for_you', label: '🔥 Hot' },
-          { id: 'nearby', label: '📍 Nearby' },
-          { id: 'recently_updated', label: '✨ New' },
-          { id: 'unresolved', label: '⚡ Urgent' },
-          { id: 'resolved', label: '✅ Resolved' },
-          { id: 'communities', label: '🏛️ Communities' },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            className={`feed-tab-btn ${activeFeedTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveFeedTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
       </div>
 
       {/* Category Filter Chips */}
@@ -223,29 +288,29 @@ export const ExploreFeed: React.FC = () => {
         ))}
       </div>
 
-      {/* Feed Scope & Sort */}
+      {/* Feed Scope & Radius Filter */}
       <div className="feed-scope-bar">
         <div className="scope-indicator" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <MapPin size={14} color="#0284c7" />
+          <MapPin size={14} color="#2878D0" />
           <span>
             {selectedLocation
-              ? `Around ${selectedLocation.locality} · within ${selectedRadiusKm} km`
+              ? `Showing issues within ${selectedRadiusKm} km of ${selectedLocation.locality}`
               : 'Choose a location to filter by proximity'}
           </span>
           <button
             onClick={() => setIsLocationModalOpen(true)}
-            style={{ fontSize: '11px', color: '#0284c7', fontWeight: 600, textDecoration: 'underline' }}
+            style={{ fontSize: '11px', color: '#2878D0', fontWeight: 600, textDecoration: 'underline' }}
           >
             Change
           </button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '12px', color: '#64748b' }}>Radius:</span>
+          <span style={{ fontSize: '12px', color: '#64748b' }}>Search Radius:</span>
           <select
             value={selectedRadiusKm}
             onChange={(e) => setSelectedRadiusKm(Number(e.target.value))}
             style={{
-              padding: '2px 8px',
+              padding: '3px 8px',
               fontSize: '12px',
               borderRadius: '6px',
               border: '1px solid #cbd5e1',
@@ -261,46 +326,46 @@ export const ExploreFeed: React.FC = () => {
         </div>
       </div>
 
-      {/* Incident Cards Feed or Honest Empty State */}
+      {/* Incident Feed Items */}
       {sortedIncidents.length === 0 ? (
         <div
           style={{
             backgroundColor: '#fff',
             border: '1px solid #e2e8f0',
-            borderRadius: '16px',
+            borderRadius: '20px',
             padding: '48px 32px',
             textAlign: 'center',
             color: '#64748b',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
           }}
         >
           <div
             style={{
-              width: '56px',
-              height: '56px',
+              width: '60px',
+              height: '60px',
               borderRadius: '50%',
               backgroundColor: '#f1f5f9',
-              color: '#0284c7',
+              color: '#2878D0',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 16px',
             }}
           >
-            <MapPin size={26} />
+            <MapPin size={28} />
           </div>
-          <h2 style={{ fontWeight: 800, fontSize: '18px', color: '#0f172a', marginBottom: '8px' }}>
-            No civic issues have been reported in this area yet.
+          <h2 style={{ fontWeight: 800, fontSize: '19px', color: '#0f172a', marginBottom: '8px' }}>
+            No civic issues reported in this immediate area yet
           </h2>
           <p style={{ fontSize: '13.5px', color: '#64748b', maxWidth: '440px', margin: '0 auto 20px', lineHeight: 1.5 }}>
-            Be the first to report an issue in your neighborhood. Your photographic signal helps local authorities and neighbors corroborate problems early.
+            Be the first resident to report an issue in your neighborhood. Your photographic signal helps local authorities and neighbors corroborate problems early.
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <button
               className="btn-primary-create"
               onClick={handleStartReport}
-              style={{ height: '38px', padding: '0 20px' }}
+              style={{ height: '40px', padding: '0 22px' }}
             >
               <PlusCircle size={16} />
               <span>Report a Civic Issue</span>
@@ -311,7 +376,7 @@ export const ExploreFeed: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                height: '38px',
+                height: '40px',
                 padding: '0 18px',
                 borderRadius: '20px',
                 border: '1px solid #cbd5e1',
@@ -326,7 +391,6 @@ export const ExploreFeed: React.FC = () => {
             </button>
           </div>
 
-          {/* Prompt to try the demo data area if user chose another neighborhood */}
           {selectedLocation && selectedLocation.locality !== 'Basavanagudi' && (
             <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
               <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '6px' }}>
@@ -348,7 +412,7 @@ export const ExploreFeed: React.FC = () => {
                 style={{
                   fontSize: '12px',
                   fontWeight: 700,
-                  color: '#ff4500',
+                  color: '#FF4D1A',
                   textDecoration: 'underline',
                 }}
               >
@@ -359,8 +423,8 @@ export const ExploreFeed: React.FC = () => {
         </div>
       ) : (
         sortedIncidents.map((incident) => {
-          const isThresholdNear = incident.counts.uniqueContributors >= 35 && incident.counts.uniqueContributors < 50;
           const isRoomActive = incident.counts.uniqueContributors >= 50 || incident.status === 'room_active';
+          const isUrgentHazard = incident.severity === 'high' || incident.categoryId === 'electricity_lighting';
 
           return (
             <article key={incident.id} className="incident-card">
@@ -381,12 +445,20 @@ export const ExploreFeed: React.FC = () => {
                   </div>
                 </div>
 
-                <button
-                  style={{ color: '#94a3b8', padding: '4px', borderRadius: '50%' }}
-                  onClick={() => alert(`Incident Reference: ${incident.reference}\nCoordinates: ${incident.location.lat}, ${incident.location.lng}\nReporter: u/${incident.reporter.name}`)}
-                >
-                  •••
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {isUrgentHazard && (
+                    <span className="urgent-hazard-badge">
+                      <ShieldAlert size={12} />
+                      <span>Urgent Hazard</span>
+                    </span>
+                  )}
+                  <button
+                    style={{ color: '#94a3b8', padding: '4px', borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer' }}
+                    onClick={() => alert(`Incident Reference: ${incident.reference}\nCoordinates: ${incident.location.lat}, ${incident.location.lng}\nReporter: u/${incident.reporter.name}`)}
+                  >
+                    •••
+                  </button>
+                </div>
               </div>
 
               {/* Category & Status Row */}
@@ -430,7 +502,7 @@ export const ExploreFeed: React.FC = () => {
                 <MapPin size={13} style={{ display: 'inline', marginRight: '4px' }} />
                 <span>{incident.landmark}</span>
                 {incident.distanceKm !== undefined && (
-                  <span style={{ color: '#0284c7', fontWeight: 600, marginLeft: '6px' }}>
+                  <span style={{ color: '#2878D0', fontWeight: 600, marginLeft: '6px' }}>
                     · {formatDistance(incident.distanceKm)} away
                   </span>
                 )}
@@ -439,7 +511,7 @@ export const ExploreFeed: React.FC = () => {
               {/* Description */}
               <p className="card-description">{incident.description}</p>
 
-              {/* Photo Evidence Thumbnail (Exact Figma PDF) */}
+              {/* Photo Evidence Preview */}
               {incident.evidence.length > 0 && (
                 <div
                   className="card-evidence-thumbnail"
@@ -452,15 +524,19 @@ export const ExploreFeed: React.FC = () => {
                     className="card-evidence-img"
                   />
                   <div className="evidence-caption">
-                    Original evidence · {incident.evidence[0].contributorName} · {incident.evidence[0].timestamp}
+                    Evidence · {incident.evidence[0].contributorName} · {incident.evidence[0].timestamp}
                   </div>
                 </div>
               )}
 
-              {/* Independent Metrics Row (Exact Figma PDF) */}
+              {/* Independent Metrics Row */}
               <div className="card-counters-row">
                 <span>
-                  <strong>{incident.counts.witnesses}</strong> witnessed
+                  <strong>{incident.counts.witnesses}</strong> saw it
+                </span>
+                <span>·</span>
+                <span>
+                  <strong>{incident.counts.didNotSeeCount ?? 0}</strong> didn't see
                 </span>
                 <span>·</span>
                 <span>
@@ -480,7 +556,7 @@ export const ExploreFeed: React.FC = () => {
                       ? 'Community Room Active'
                       : incident.counts.uniqueContributors >= 40
                       ? 'Unique eligible contributors'
-                      : 'Room not yet available'}
+                      : 'Room threshold progress'}
                   </span>
                   <span>
                     <strong>{incident.counts.uniqueContributors}</strong> / 50
@@ -496,13 +572,13 @@ export const ExploreFeed: React.FC = () => {
                 </div>
               </div>
 
-              {/* AI Suggestion / Consolidation Callout (Exact Figma PDF) */}
+              {/* AI Suggestion / Consolidation Callout */}
               {incident.aiSuggestion && incident.aiSuggestion.relatedReportCount > 0 && (
                 <div className="ai-suggestion-box">
                   <div className="ai-suggestion-text">
                     <Sparkles size={15} />
                     <span>
-                      AI suggestion · {incident.aiSuggestion.relatedReportCount} related originals ·{' '}
+                      AI suggestion · {incident.aiSuggestion.relatedReportCount} related candidate reports ·{' '}
                       {incident.aiSuggestion.groupingStatus === 'reviewed'
                         ? 'grouping reviewed'
                         : 'review before grouping'}
@@ -517,56 +593,86 @@ export const ExploreFeed: React.FC = () => {
                 </div>
               )}
 
-              {/* Card Actions & Civic Gestures (Reddit Style Action Pills) */}
+              {/* Card Actions & Mutually Exclusive Observation Selector */}
               <div className="card-actions-row">
-                <div className="gesture-buttons-group">
+                {/* Section 7: Mutually Exclusive Observation Selector */}
+                <div className="observation-segmented-control" role="group" aria-label="Incident observation selector">
                   <button
-                    className={`gesture-btn ${incident.userGestures.witnessed ? 'active' : ''}`}
-                    onClick={() => toggleGesture(incident.id, 'witnessed')}
+                    type="button"
+                    className={`obs-btn obs-saw-it ${incident.userGestures.witnessed ? 'selected' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleGesture(incident.id, 'witnessed');
+                    }}
                     title="Confirm you saw this civic issue"
                   >
                     <Eye size={14} />
-                    <span>I Saw This</span>
-                    <span style={{ fontWeight: 800 }}>({incident.counts.witnesses})</span>
+                    <span>I Saw It</span>
+                    <span className="obs-counter">{incident.counts.witnesses}</span>
                   </button>
 
                   <button
-                    className={`gesture-btn ${incident.userGestures.affected ? 'active' : ''}`}
-                    onClick={() => toggleGesture(incident.id, 'affected')}
-                    title="Record that this issue impacts your daily commute or residence"
+                    type="button"
+                    className={`obs-btn obs-did-not-see ${incident.userGestures.didNotSee ? 'selected' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleGesture(incident.id, 'didNotSee');
+                    }}
+                    title="Report that you did not see this issue"
                   >
-                    <Users size={14} />
-                    <span>I'm Affected</span>
-                    <span style={{ fontWeight: 800 }}>({incident.counts.affected})</span>
-                  </button>
-
-                  <button
-                    className="gesture-btn"
-                    onClick={() => handleOpenIncident(incident)}
-                    title="Contribute photographic or video evidence"
-                  >
-                    <Camera size={14} />
-                    <span>Add Evidence</span>
+                    <EyeOff size={14} />
+                    <span>I Didn't See It</span>
+                    <span className="obs-counter">{incident.counts.didNotSeeCount ?? 0}</span>
                   </button>
                 </div>
 
-                <div className="card-footer-meta">
-                  <span
-                    className="gesture-btn"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleOpenIncident(incident)}
+                {/* Secondary Action Controls */}
+                <div className="card-secondary-actions">
+                  <button
+                    className={`action-pill-btn ${incident.userGestures.affected ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleGesture(incident.id, 'affected');
+                    }}
+                    title="Record that this issue affects you"
+                  >
+                    <Users size={14} />
+                    <span>Affected ({incident.counts.affected})</span>
+                  </button>
+
+                  <button
+                    className="action-pill-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenIncident(incident);
+                    }}
+                    title="View and contribute evidence"
+                  >
+                    <Camera size={14} />
+                    <span>Evidence ({incident.counts.evidenceItems})</span>
+                  </button>
+
+                  <button
+                    className="action-pill-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenIncident(incident);
+                    }}
                     title="Open discussions"
                   >
                     <MessageSquare size={14} />
                     <span>{incident.counts.discussions}</span>
-                  </span>
+                  </button>
 
-                  <span
+                  <button
                     className={`btn-follow ${incident.userGestures.followed ? 'active' : ''}`}
-                    onClick={() => toggleGesture(incident.id, 'followed')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleGesture(incident.id, 'followed');
+                    }}
                   >
                     {incident.userGestures.followed ? '✓ Following' : '+ Follow'}
-                  </span>
+                  </button>
                 </div>
               </div>
             </article>
@@ -574,17 +680,9 @@ export const ExploreFeed: React.FC = () => {
         })
       )}
 
-      {/* Footer Informational Disclaimer (Exact Figma PDF) */}
-      <div
-        style={{
-          textAlign: 'center',
-          fontSize: '12px',
-          color: '#64748b',
-          padding: '24px 0',
-          borderTop: '1px solid #e2e8f0',
-        }}
-      >
-        You're up to date in {selectedLocation?.locality || 'your area'}. A witness signal is an observation, not proof of validity or resolution.
+      {/* Footer Informational Disclaimer */}
+      <div className="feed-footer-disclaimer">
+        You're up to date in {selectedLocation?.locality || 'your area'}. A witness signal is an observation, not official proof of validity or government resolution.
       </div>
     </div>
   );

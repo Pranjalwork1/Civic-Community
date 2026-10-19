@@ -4,6 +4,7 @@ import {
   MapPin,
   Camera,
   Eye,
+  EyeOff,
   Users,
   Clock,
   CheckCircle2,
@@ -310,26 +311,51 @@ export const IncidentDetailView: React.FC = () => {
               )}
             </div>
 
-            {/* Civic Gestures Action Toolbar */}
+            {/* Civic Gestures Action Toolbar with Mutually Exclusive Observation Selector */}
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginBottom: '24px' }}>
               <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>
-                Civic Gestures (Record your observation)
+                Resident Observation Signal (Mutually Exclusive)
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                <div className="observation-segmented-control" role="group" aria-label="Incident observation selector">
+                  <button
+                    type="button"
+                    className={`obs-btn obs-saw-it ${currentIncident.userGestures.witnessed ? 'selected' : ''}`}
+                    onClick={() => toggleGesture(currentIncident.id, 'witnessed')}
+                    title="Confirm you saw this civic issue"
+                  >
+                    <Eye size={15} />
+                    <span>I Saw It</span>
+                    <span className="obs-counter">{currentIncident.counts.witnesses}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`obs-btn obs-did-not-see ${currentIncident.userGestures.didNotSee ? 'selected' : ''}`}
+                    onClick={() => toggleGesture(currentIncident.id, 'didNotSee')}
+                    title="Report that you did not see this issue"
+                  >
+                    <EyeOff size={15} />
+                    <span>I Didn't See It</span>
+                    <span className="obs-counter">{currentIncident.counts.didNotSeeCount ?? 0}</span>
+                  </button>
+                </div>
+
+                <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  Your observation is a personal signal and updates the public mesh in real time.
+                </span>
+              </div>
+
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>
+                Additional Community Actions
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                <button
-                  className={`gesture-btn ${currentIncident.userGestures.witnessed ? 'active' : ''}`}
-                  onClick={() => toggleGesture(currentIncident.id, 'witnessed')}
-                >
-                  <Eye size={15} />
-                  <span>I Saw This</span>
-                </button>
-
                 <button
                   className={`gesture-btn ${currentIncident.userGestures.affected ? 'active' : ''}`}
                   onClick={() => toggleGesture(currentIncident.id, 'affected')}
                 >
                   <Users size={15} />
-                  <span>I'm Affected</span>
+                  <span>I'm Affected ({currentIncident.counts.affected})</span>
                 </button>
 
                 <button
@@ -365,7 +391,7 @@ export const IncidentDetailView: React.FC = () => {
                   className={`gesture-btn ${currentIncident.userGestures.followed ? 'active' : ''}`}
                   onClick={() => toggleGesture(currentIncident.id, 'followed')}
                 >
-                  {currentIncident.userGestures.followed ? '✓ Following' : 'Follow Incident'}
+                  {currentIncident.userGestures.followed ? '✓ Following' : '+ Follow Incident'}
                 </button>
               </div>
             </div>

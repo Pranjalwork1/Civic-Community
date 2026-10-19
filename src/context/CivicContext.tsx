@@ -251,9 +251,25 @@ export const CivicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const nextVal = !currentVal;
         const newGestures = { ...inc.userGestures, [gestureKey]: nextVal };
 
-        const newCounts = { ...inc.counts };
+        const newCounts = {
+          ...inc.counts,
+          didNotSeeCount: inc.counts.didNotSeeCount || 0,
+        };
+
         if (gestureKey === 'witnessed') {
           newCounts.witnesses += nextVal ? 1 : -1;
+          // If turning on "I Saw It", mutually turn off "I Didn't See It"
+          if (nextVal && inc.userGestures.didNotSee) {
+            newGestures.didNotSee = false;
+            newCounts.didNotSeeCount = Math.max(0, (newCounts.didNotSeeCount || 1) - 1);
+          }
+        } else if (gestureKey === 'didNotSee') {
+          newCounts.didNotSeeCount = Math.max(0, (newCounts.didNotSeeCount || 0) + (nextVal ? 1 : -1));
+          // If turning on "I Didn't See It", mutually turn off "I Saw It"
+          if (nextVal && inc.userGestures.witnessed) {
+            newGestures.witnessed = false;
+            newCounts.witnesses = Math.max(0, newCounts.witnesses - 1);
+          }
         } else if (gestureKey === 'affected') {
           newCounts.affected += nextVal ? 1 : -1;
         } else if (gestureKey === 'stillHappening') {
@@ -266,9 +282,9 @@ export const CivicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           newCounts.followers += nextVal ? 1 : -1;
         }
 
-        // Check if user is now a contributor
+        // Check if user is now a contributor (only for positive civic actions)
         let newContributors = [...inc.contributorIds];
-        if (nextVal && !newContributors.includes(currentUser.id)) {
+        if (gestureKey !== 'didNotSee' && nextVal && !newContributors.includes(currentUser.id)) {
           newContributors.push(currentUser.id);
           newCounts.uniqueContributors = newContributors.length;
         }

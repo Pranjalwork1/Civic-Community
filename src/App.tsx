@@ -15,6 +15,9 @@ import { ConsolidationModal } from './components/incident/ConsolidationModal';
 import { DemoSimulationBar } from './components/demo/DemoSimulationBar';
 import { LocationSelectModal } from './components/common/LocationSelectModal';
 
+import { WindowHeaderBar } from './components/layout/WindowHeaderBar';
+import { FloatingSideWidgets } from './components/layout/FloatingSideWidgets';
+
 export const MainAppContent: React.FC = () => {
   const { activeView, isLocationModalOpen, setIsLocationModalOpen, selectedLocation } = useCivic();
 
@@ -49,14 +52,24 @@ export const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="app-container">
-      <Navbar />
+    <div className="desktop-scenic-viewport">
+      {/* Scenic Backdrop Overlay for legibility & ambient depth */}
+      <div className="scenic-backdrop-overlay" />
 
-      <main className="main-layout">
-        <Sidebar />
-        {renderActiveView()}
-        <RightSidebar />
-      </main>
+      {/* Outer Floating Companion Widgets on wide screens */}
+      <FloatingSideWidgets />
+
+      {/* Floating Rounded Application Workspace inspired by reference image */}
+      <div className="floating-workspace-window">
+        <WindowHeaderBar />
+        <Navbar />
+
+        <main className="main-layout">
+          <Sidebar />
+          {renderActiveView()}
+          <RightSidebar />
+        </main>
+      </div>
 
       <ConsolidationModal />
       <LocationSelectModal
