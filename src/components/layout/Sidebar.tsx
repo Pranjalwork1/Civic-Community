@@ -1,224 +1,191 @@
 import React from 'react';
 import {
+  Menu,
+  Home,
   Compass,
-  MapPin,
-  BookmarkCheck,
-  MessagesSquare,
+  Flame,
+  DoorOpen,
   FileText,
   Bell,
   Bookmark,
-  ShieldAlert,
-  Flame,
-  Droplet,
-  Trash2,
-  Zap,
-  HardHat,
-  Search,
-  Users,
-  ChevronRight,
-  Shield,
-  LifeBuoy,
+  Briefcase,
+  User,
+  Settings,
 } from 'lucide-react';
 import { useCivic } from '../../context/CivicContext';
-import { ISSUE_CATEGORIES } from '../../data/categories';
+import { DEMO_USERS } from '../../data/mockData';
 
 export const Sidebar: React.FC = () => {
   const {
     activeView,
     setActiveView,
     rooms,
-    incidents,
     notifications,
-    resetDraft,
-    setWizardStep,
-    selectedLocation,
-    setIsLocationModalOpen,
-    activeCategoryFilter,
     setActiveCategoryFilter,
+    setActiveFeedTab,
+    setIsLocationModalOpen,
     currentUser,
+    setCurrentUser,
   } = useCivic();
 
   const activeRoomsCount = rooms.length;
   const unreadNotifsCount = notifications.filter((n) => !n.isRead).length;
 
-  const handleStartReport = () => {
-    resetDraft();
-    setWizardStep(1);
-    setActiveView('report_wizard');
-  };
-
-  const getCategoryCount = (categoryId: string) => {
-    return incidents.filter((i) => i.categoryId === categoryId).length;
-  };
-
   return (
-    <aside className="left-sidebar" aria-label="Main Navigation">
-      {/* 1. CivicSignal Brand Logo */}
-      <div className="sidebar-brand-box">
+    <aside className="left-icon-rail" aria-label="Quick Navigation">
+      {/* Top Hamburger Control (Reddit Style) */}
+      <button
+        className="rail-menu-btn"
+        title="Toggle Menu / Navigation Drawer"
+        aria-label="Toggle Navigation Menu"
+        onClick={() => {
+          setActiveCategoryFilter('all');
+          setActiveFeedTab('all');
+          setActiveView('explore');
+        }}
+      >
+        <Menu size={22} />
+      </button>
+
+      {/* Primary Icon Navigation Stack */}
+      <nav className="rail-icons-stack" aria-label="Icon Navigation">
+        {/* 1. Home Feed */}
         <button
-          className="sidebar-brand-link"
+          className={`rail-icon-btn ${activeView === 'explore' ? 'active' : ''}`}
           onClick={() => {
             setActiveCategoryFilter('all');
+            setActiveFeedTab('all');
             setActiveView('explore');
           }}
-          title="CivicSignal Home"
+          title="Home Feed"
+          aria-label="Home Feed"
         >
-          <div className="sidebar-logo-icon">
-            <ShieldAlert size={18} />
-          </div>
-          <span className="sidebar-logo-text">CivicSignal</span>
+          <Home size={20} />
+          <span className="rail-tooltip">Home Feed</span>
         </button>
-      </div>
 
-      <div className="sidebar-nav-scroll-area">
-        {/* 2. FEEDS */}
-        <div className="sidebar-nav-section">
-          <div className="sidebar-section-title">FEEDS</div>
+        {/* 2. Nearby Radar */}
+        <button
+          className="rail-icon-btn"
+          onClick={() => {
+            setActiveCategoryFilter('all');
+            setActiveFeedTab('nearby');
+            setActiveView('explore');
+          }}
+          title="Nearby Radar"
+          aria-label="Nearby Radar"
+        >
+          <Compass size={20} />
+          <span className="rail-tooltip">Nearby Radar</span>
+        </button>
 
-          <button
-            className={`sidebar-nav-link ${activeView === 'explore' && activeCategoryFilter === 'all' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveCategoryFilter('all');
-              setActiveView('explore');
-            }}
-          >
-            <Compass size={17} className="sidebar-icon" />
-            <span className="sidebar-link-text">Home Feed</span>
-            <span className="sidebar-link-badge">{incidents.length}</span>
-          </button>
+        {/* 3. Following / Trending */}
+        <button
+          className="rail-icon-btn"
+          onClick={() => {
+            setActiveFeedTab('recently_updated');
+            setActiveView('explore');
+          }}
+          title="Following & Hot Issues"
+          aria-label="Following"
+        >
+          <Flame size={20} />
+          <span className="rail-tooltip">Following</span>
+        </button>
 
-          <button
-            className="sidebar-nav-link"
-            onClick={() => {
-              setActiveCategoryFilter('all');
-              setActiveView('explore');
-            }}
-          >
-            <MapPin size={17} className="sidebar-icon" />
-            <span className="sidebar-link-text">Nearby Radar</span>
-          </button>
+        {/* 4. Incident Rooms */}
+        <button
+          className={`rail-icon-btn ${activeView === 'incident_room' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveView('incident_room');
+          }}
+          title={`Incident Rooms (${activeRoomsCount} active)`}
+          aria-label="Incident Rooms"
+        >
+          <DoorOpen size={20} />
+          {activeRoomsCount > 0 && <span className="rail-badge">{activeRoomsCount}</span>}
+          <span className="rail-tooltip">Incident Rooms</span>
+        </button>
 
-          <button
-            className="sidebar-nav-link"
-            onClick={() => setActiveView('explore')}
-          >
-            <BookmarkCheck size={17} className="sidebar-icon" />
-            <span className="sidebar-link-text">Following</span>
-          </button>
-        </div>
+        {/* 5. Petitions & Tracking */}
+        <button
+          className={`rail-icon-btn ${activeView === 'tracking' ? 'active' : ''}`}
+          onClick={() => setActiveView('tracking')}
+          title="Petitions & Complaint Tracking"
+          aria-label="Petitions & Tracking"
+        >
+          <FileText size={20} />
+          <span className="rail-tooltip">Petitions & Tracking</span>
+        </button>
 
-        {/* 3. CIVIC WORKSPACES */}
-        <div className="sidebar-nav-section">
-          <div className="sidebar-section-title">CIVIC WORKSPACES</div>
+        {/* 6. Notifications */}
+        <button
+          className={`rail-icon-btn ${activeView === 'notifications' ? 'active' : ''}`}
+          onClick={() => setActiveView('notifications')}
+          title={`Notifications (${unreadNotifsCount} unread)`}
+          aria-label="Notifications"
+        >
+          <Bell size={20} />
+          {unreadNotifsCount > 0 && <span className="rail-badge alert">{unreadNotifsCount}</span>}
+          <span className="rail-tooltip">Notifications</span>
+        </button>
 
-          <button
-            className={`sidebar-nav-link ${activeView === 'incident_room' ? 'active' : ''}`}
-            onClick={() => {
-              if (rooms.length > 0) {
-                setActiveView('incident_room');
-              } else {
-                alert('Incident Rooms unlock when 50 unique neighbors corroborate an issue! You can trigger this using Dev Tools at the bottom-right.');
-              }
-            }}
-          >
-            <MessagesSquare size={17} className="sidebar-icon" />
-            <span className="sidebar-link-text">Incident Rooms</span>
-            {activeRoomsCount > 0 && (
-              <span className="sidebar-link-badge room-badge">{activeRoomsCount}</span>
-            )}
-          </button>
+        {/* 7. Saved Reports */}
+        <button
+          className="rail-icon-btn"
+          onClick={() => {
+            setActiveFeedTab('needs_attention');
+            setActiveView('explore');
+          }}
+          title="Saved Reports"
+          aria-label="Saved Reports"
+        >
+          <Bookmark size={20} />
+          <span className="rail-tooltip">Saved Reports</span>
+        </button>
 
-          <button
-            className={`sidebar-nav-link ${activeView === 'tracking' ? 'active' : ''}`}
-            onClick={() => setActiveView('tracking')}
-          >
-            <FileText size={17} className="sidebar-icon" />
-            <span className="sidebar-link-text">Petitions & Tracking</span>
-          </button>
+        {/* 8. My Contributions */}
+        <button
+          className="rail-icon-btn"
+          onClick={() => {
+            setActiveFeedTab('unresolved');
+            setActiveView('explore');
+          }}
+          title="My Contributions"
+          aria-label="My Contributions"
+        >
+          <Briefcase size={20} />
+          <span className="rail-tooltip">My Contributions</span>
+        </button>
 
-          <button
-            className={`sidebar-nav-link ${activeView === 'notifications' ? 'active' : ''}`}
-            onClick={() => setActiveView('notifications')}
-          >
-            <Bell size={17} className="sidebar-icon" />
-            <span className="sidebar-link-text">Notifications</span>
-            {unreadNotifsCount > 0 && (
-              <span className="sidebar-link-badge alert-badge">{unreadNotifsCount}</span>
-            )}
-          </button>
+        {/* Divider */}
+        <div className="rail-divider" />
 
-          <button
-            className="sidebar-nav-link"
-            onClick={() => setActiveView('explore')}
-          >
-            <Bookmark size={17} className="sidebar-icon" />
-            <span className="sidebar-link-text">Saved Reports</span>
-          </button>
-        </div>
+        {/* 9. Profile / Persona */}
+        <button
+          className="rail-icon-btn"
+          onClick={() => {
+            const nextUser = DEMO_USERS.find((u) => u.id !== currentUser.id) || DEMO_USERS[0];
+            setCurrentUser(nextUser);
+          }}
+          title={`Profile: ${currentUser.name} (${currentUser.role === 'community_leader' ? 'Leader' : 'Resident'}). Click to toggle.`}
+          aria-label="User Profile"
+        >
+          <User size={20} />
+          <span className="rail-tooltip">{currentUser.name}</span>
+        </button>
 
-        {/* 4. CIVIC TOPICS */}
-        <div className="sidebar-nav-section">
-          <div className="sidebar-section-title">CIVIC TOPICS</div>
-
-          {ISSUE_CATEGORIES.slice(0, 7).map((cat) => {
-            const count = getCategoryCount(cat.id);
-            const isSelected = activeView === 'explore' && activeCategoryFilter === cat.id;
-
-            return (
-              <button
-                key={cat.id}
-                className={`sidebar-nav-link ${isSelected ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveCategoryFilter(cat.id);
-                  setActiveView('explore');
-                }}
-              >
-                <span className="sidebar-topic-icon">{cat.icon}</span>
-                <span className="sidebar-link-text">{cat.name}</span>
-                {count > 0 && <span className="sidebar-topic-count">{count}</span>}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* 5. CURRENT COMMUNITY */}
-        <div className="sidebar-community-box">
-          <div className="community-box-label">CURRENT COMMUNITY</div>
-          <div className="community-box-name">
-            {selectedLocation ? selectedLocation.locality : 'Knowledge Park III'}
-          </div>
-          <div className="community-box-city">
-            {selectedLocation ? selectedLocation.city : 'Greater Noida'}
-          </div>
-          <div className="community-box-actions">
-            <button
-              className="community-box-change-btn"
-              onClick={() => setIsLocationModalOpen(true)}
-            >
-              Change Location
-            </button>
-            <button
-              className="community-box-report-btn"
-              onClick={handleStartReport}
-            >
-              + Report Issue
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 6. User Profile at Bottom (Section 4) */}
-      <div className="sidebar-bottom-profile">
-        <div className="bottom-profile-avatar">{currentUser.avatar}</div>
-        <div className="bottom-profile-info">
-          <div className="bottom-profile-name">{currentUser.name}</div>
-          <div className="bottom-profile-role">
-            {currentUser.role === 'community_leader'
-              ? 'Community Leader'
-              : 'Verified Resident'}
-          </div>
-        </div>
-      </div>
+        {/* 10. Settings / Location */}
+        <button
+          className="rail-icon-btn"
+          onClick={() => setIsLocationModalOpen(true)}
+          title="Change Location & Settings"
+          aria-label="Location and Settings"
+        >
+          <Settings size={20} />
+          <span className="rail-tooltip">Settings</span>
+        </button>
+      </nav>
     </aside>
   );
 };

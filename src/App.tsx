@@ -17,8 +17,14 @@ import { LocationSelectModal } from './components/common/LocationSelectModal';
 import { AiAssistantDrawer } from './components/common/AiAssistantDrawer';
 
 export const MainAppContent: React.FC = () => {
-  const { activeView, isLocationModalOpen, setIsLocationModalOpen, selectedLocation } = useCivic();
-  const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
+  const {
+    activeView,
+    isLocationModalOpen,
+    setIsLocationModalOpen,
+    selectedLocation,
+    isAiDrawerOpen,
+    setIsAiDrawerOpen,
+  } = useCivic();
 
   // On first launch if no location is stored, open location selection modal
   React.useEffect(() => {

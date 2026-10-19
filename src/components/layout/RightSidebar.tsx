@@ -16,10 +16,15 @@ import {
   Activity,
   Flame,
   Radio,
+  Sparkles,
+  Bot,
+  ShieldAlert,
+  ArrowRight,
+  Check,
+  Zap,
 } from 'lucide-react';
 import { useCivic } from '../../context/CivicContext';
 import { calculateDistanceKm, formatDistance } from '../../services/locationService';
-import { DEMO_USERS } from '../../data/mockData';
 
 export const RightSidebar: React.FC = () => {
   const {
@@ -33,12 +38,10 @@ export const RightSidebar: React.FC = () => {
     selectedLocation,
     selectedRadiusKm,
     setIsLocationModalOpen,
-    currentUser,
-    setCurrentUser,
-    resetAllDemoData,
+    setIsAiDrawerOpen,
   } = useCivic();
 
-  // Calculate distances to all available incidents from selected location
+  // Calculate real distances to all available incidents from selected location
   const incidentsWithDistance = incidents
     .map((inc) => {
       const dist = selectedLocation
@@ -53,15 +56,21 @@ export const RightSidebar: React.FC = () => {
     })
     .sort((a, b) => (a.distanceKm ?? 9999) - (b.distanceKm ?? 9999));
 
-  const nearbyInRadius = selectedLocation
-    ? incidentsWithDistance.filter((i) => (i.distanceKm ?? 9999) <= selectedRadiusKm)
-    : incidentsWithDistance;
+  const nearbyUnresolved = selectedLocation
+    ? incidentsWithDistance.filter(
+        (i) => (i.distanceKm ?? 9999) <= selectedRadiusKm && i.status !== 'resolved'
+      )
+    : incidentsWithDistance.filter((i) => i.status !== 'resolved');
 
-  const activeRoomsCount = rooms.length;
+  const urgentHazards = incidentsWithDistance.filter(
+    (i) => i.severity === 'critical' || i.categoryId === 'streetlighting_electrical'
+  );
+
+  const resolvedIncidents = incidentsWithDistance.filter((i) => i.status === 'resolved');
 
   if (activeView === 'report_wizard') {
     return (
-      <aside className="right-sidebar">
+      <aside className="right-sidebar" aria-label="Reporting Guidelines">
         <div className="right-sidebar-card">
           <div className="right-sidebar-card-title">Evidence & Privacy Guidelines</div>
           <p className="right-sidebar-card-desc">
@@ -100,51 +109,57 @@ export const RightSidebar: React.FC = () => {
     );
   }
 
-  // Explore Mode Right Sidebar per Section 14
   return (
-    <aside className="right-sidebar" aria-label="Community Profile and Activity">
-      {/* 1. USER PROFILE (Section 14) */}
-      <div className="right-sidebar-card profile-card-module">
-        <div className="profile-card-top">
-          <div className="profile-card-avatar">{currentUser.avatar}</div>
-          <div className="profile-card-text">
-            <h3 className="profile-card-name">{currentUser.name}</h3>
-            <span className="profile-card-role-pill">
-              {currentUser.role === 'community_leader'
-                ? 'Community Leader'
-                : 'Verified Resident'}
-            </span>
+    <aside className="right-sidebar" aria-label="Community Context and Activity">
+      {/* ====================================================================
+          A. CIVICSIGNAL ASSISTANT (Hero Orange Card matching Reddit Premium in ref)
+          ==================================================================== */}
+      <div className="sidebar-hero-assistant-card">
+        <div className="hero-assistant-icon-row">
+          <div className="hero-assistant-icon-box">
+            <Sparkles size={20} />
           </div>
+          <span className="hero-assistant-badge">AI COPILOT</span>
         </div>
-
+        <h3 className="hero-assistant-title">CivicSignal Assistant</h3>
+        <p className="hero-assistant-desc">
+          Need help turning a local problem into action? Ask for hazard safety guidance, evidence tips, or petition rules.
+        </p>
         <button
-          className="profile-card-view-btn"
-          onClick={() => {
-            const nextUser = DEMO_USERS.find((u) => u.id !== currentUser.id) || DEMO_USERS[0];
-            setCurrentUser(nextUser);
-          }}
-          title="Switch resident / leader persona"
+          type="button"
+          className="hero-assistant-action-btn"
+          onClick={() => setIsAiDrawerOpen(true)}
+          title="Open CivicSignal AI Assistant"
         >
-          <UserCheck size={14} />
-          <span>Switch Persona (Current: {currentUser.name.split(' ')[0]})</span>
+          <Bot size={15} />
+          <span>Ask CivicSignal</span>
+          <ArrowRight size={14} className="hero-btn-arrow" />
         </button>
+        <div className="hero-assistant-subtext">
+          <span>⚡ Localized guidance for {selectedLocation?.locality || 'your area'}</span>
+        </div>
       </div>
 
-      {/* 2. YOUR COMMUNITIES (Section 14) */}
+      {/* ====================================================================
+          B. YOUR COMMUNITIES (Section 9.B)
+          ==================================================================== */}
       <div className="right-sidebar-card">
         <div className="right-card-header-bar">
           <span className="right-card-heading">YOUR COMMUNITIES</span>
           <button
-            className="right-card-view-all-link"
+            type="button"
+            className="right-card-action-link"
             onClick={() => setIsLocationModalOpen(true)}
           >
-            Change
+            View All
           </button>
         </div>
 
         <div className="communities-compact-list">
           <div className="community-compact-row active">
-            <div className="community-badge-dot bg-orange">KP</div>
+            <div className="community-badge-dot bg-orange">
+              {selectedLocation?.locality ? selectedLocation.locality.slice(0, 2).toUpperCase() : 'KP'}
+            </div>
             <div className="community-compact-info">
               <span className="community-compact-name">
                 {selectedLocation ? selectedLocation.locality : 'Knowledge Park III'}
@@ -158,10 +173,10 @@ export const RightSidebar: React.FC = () => {
             className="community-compact-row"
             onClick={() => setIsLocationModalOpen(true)}
           >
-            <div className="community-badge-dot bg-blue">BS</div>
+            <div className="community-badge-dot bg-blue">RS</div>
             <div className="community-compact-info">
-              <span className="community-compact-name">Basavanagudi</span>
-              <span className="community-compact-meta">28 contributors · Bengaluru</span>
+              <span className="community-compact-name">Your Residential Society</span>
+              <span className="community-compact-meta">88 residents · Local RWA</span>
             </div>
           </div>
 
@@ -169,29 +184,42 @@ export const RightSidebar: React.FC = () => {
             className="community-compact-row"
             onClick={() => setIsLocationModalOpen(true)}
           >
-            <div className="community-badge-dot bg-green">KM</div>
+            <div className="community-badge-dot bg-green">CC</div>
             <div className="community-compact-info">
-              <span className="community-compact-name">Koramangala</span>
-              <span className="community-compact-meta">19 contributors · Bengaluru</span>
+              <span className="community-compact-name">Your College Community</span>
+              <span className="community-compact-meta">154 members · Campus Zone</span>
+            </div>
+          </div>
+
+          <div
+            className="community-compact-row"
+            onClick={() => setIsLocationModalOpen(true)}
+          >
+            <div className="community-badge-dot bg-purple">NR</div>
+            <div className="community-compact-info">
+              <span className="community-compact-name">Nearby Residents</span>
+              <span className="community-compact-meta">36 members · Civic Watch</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. NEARBY INCIDENTS (Section 14) */}
+      {/* ====================================================================
+          C. NEARBY INCIDENTS (Section 9.C)
+          ==================================================================== */}
       <div className="right-sidebar-card">
         <div className="right-card-header-bar">
           <span className="right-card-heading">NEARBY INCIDENTS</span>
           <span className="nearby-radius-tag">{selectedRadiusKm} km</span>
         </div>
 
-        {nearbyInRadius.length === 0 ? (
+        {nearbyUnresolved.length === 0 ? (
           <div className="nearby-empty-note">
-            No incidents reported within {selectedRadiusKm} km.
+            No unresolved incidents reported within {selectedRadiusKm} km.
           </div>
         ) : (
           <div className="nearby-compact-list">
-            {nearbyInRadius.slice(0, 4).map((inc) => (
+            {nearbyUnresolved.slice(0, 4).map((inc) => (
               <div
                 key={inc.id}
                 className="nearby-compact-row"
@@ -199,6 +227,7 @@ export const RightSidebar: React.FC = () => {
                   setCurrentIncidentId(inc.id);
                   setActiveView('incident_detail');
                 }}
+                title={inc.title}
               >
                 <div className="nearby-row-left">
                   <span className="nearby-issue-title">{inc.title}</span>
@@ -206,44 +235,125 @@ export const RightSidebar: React.FC = () => {
                     {inc.category} · {inc.counts.witnesses} saw it
                   </span>
                 </div>
-                <span className="nearby-distance-tag">
-                  {inc.distanceKm !== undefined ? formatDistance(inc.distanceKm) : 'Nearby'}
-                </span>
+                <div className="nearby-row-right">
+                  <span className="nearby-distance-tag">
+                    {inc.distanceKm !== undefined ? formatDistance(inc.distanceKm) : 'Nearby'}
+                  </span>
+                  <span className={`nearby-status-badge ${inc.status}`}>
+                    {inc.status === 'room_active' ? 'Room Open' : 'Unresolved'}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* 4. CIVIC ACTIVITY (Section 14) */}
+      {/* ====================================================================
+          D. COMMUNITY ACTIVITY (Section 9.D)
+          ==================================================================== */}
       <div className="right-sidebar-card civic-activity-module">
         <div className="right-card-header-bar">
-          <span className="right-card-heading">CIVIC ACTIVITY</span>
+          <span className="right-card-heading">COMMUNITY ACTIVITY</span>
           <Activity size={14} color="#FF4D1A" />
         </div>
 
         <div className="activity-stat-rows">
           <div className="activity-stat-item">
-            <span className="activity-stat-bullet">●</span>
+            <span className="activity-stat-bullet orange">●</span>
             <span className="activity-stat-text">
-              <strong>{nearbyInRadius.length}</strong> incidents near your selected area
-            </span>
-          </div>
-
-          <div className="activity-stat-item">
-            <span className="activity-stat-bullet amber">●</span>
-            <span className="activity-stat-text">
-              <strong>{incidents.filter((i) => i.counts.uniqueContributors < 50).length}</strong> reports gathering resident verification
+              <strong>New photo evidence</strong> added to streetlight report
             </span>
           </div>
 
           <div className="activity-stat-item">
             <span className="activity-stat-bullet purple">●</span>
             <span className="activity-stat-text">
-              <strong>{activeRoomsCount || 1}</strong> community incident room active
+              <strong>Incident Room opened</strong> with 50 unique contributors
+            </span>
+          </div>
+
+          <div className="activity-stat-item">
+            <span className="activity-stat-bullet blue">●</span>
+            <span className="activity-stat-text">
+              <strong>Signature campaign</strong> started for road reconstruction
+            </span>
+          </div>
+
+          <div className="activity-stat-item">
+            <span className="activity-stat-bullet green">●</span>
+            <span className="activity-stat-text">
+              <strong>Leader approval</strong> granted for municipal submission
             </span>
           </div>
         </div>
+      </div>
+
+      {/* ====================================================================
+          E. URGENT SAFETY NOTICES (Section 9.E)
+          ==================================================================== */}
+      {urgentHazards.length > 0 && (
+        <div className="right-sidebar-card urgent-safety-card">
+          <div className="urgent-card-header">
+            <ShieldAlert size={16} className="urgent-shield-icon" />
+            <span className="urgent-card-title">URGENT SAFETY NOTICE</span>
+          </div>
+          <div className="urgent-card-body">
+            <p className="urgent-issue-name">{urgentHazards[0].title}</p>
+            <p className="urgent-warning-text">
+              ⚠️ Public electrical hazard reported near {urgentHazards[0].landmark}. Maintain at least 10m safe distance. Escalated to utility emergency team.
+            </p>
+            <button
+              type="button"
+              className="urgent-view-btn"
+              onClick={() => {
+                setCurrentIncidentId(urgentHazards[0].id);
+                setActiveView('incident_detail');
+              }}
+            >
+              View Hazard & Safety Guidelines →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ====================================================================
+          F. RECENTLY RESOLVED (Section 9.F)
+          ==================================================================== */}
+      <div className="right-sidebar-card">
+        <div className="right-card-header-bar">
+          <span className="right-card-heading">RECENTLY RESOLVED</span>
+          <CheckCircle2 size={14} color="#10b981" />
+        </div>
+
+        {resolvedIncidents.length === 0 ? (
+          <div className="nearby-empty-note">
+            No resolved issues recorded in this view yet.
+          </div>
+        ) : (
+          <div className="resolved-compact-list">
+            {resolvedIncidents.slice(0, 3).map((res) => (
+              <div
+                key={res.id}
+                className="resolved-compact-row"
+                onClick={() => {
+                  setCurrentIncidentId(res.id);
+                  setActiveView('incident_detail');
+                }}
+              >
+                <div className="resolved-check-icon">
+                  <Check size={12} />
+                </div>
+                <div className="resolved-row-info">
+                  <span className="resolved-title">{res.title}</span>
+                  <span className="resolved-meta">
+                    Community-verified · {res.counts.witnesses} verified fix
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </aside>
   );

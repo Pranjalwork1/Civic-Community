@@ -68,7 +68,7 @@ export const Navbar: React.FC = () => {
           <input
             type="text"
             className="search-input"
-            placeholder="Search CivicSignal, communities, incidents..."
+            placeholder="Search CivicSignal, communities, and incidents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -93,7 +93,7 @@ export const Navbar: React.FC = () => {
                 </span>
               </>
             ) : (
-              <span style={{ color: '#64748b', fontWeight: 500 }}>📍 Choose Location</span>
+              <span style={{ color: '#64748b', fontWeight: 500 }}>Choose location</span>
             )}
             <ChevronDown size={14} color="#64748b" />
           </button>
@@ -219,7 +219,7 @@ export const Navbar: React.FC = () => {
         </div>
         <button className="btn-primary-create" onClick={handleStartReport}>
           <PlusCircle size={16} />
-          <span>Create</span>
+          <span>Create Report</span>
         </button>
 
         {/* Notifications Bell */}
@@ -301,14 +301,21 @@ export const Navbar: React.FC = () => {
           )}
         </div>
 
-        {/* User Persona & Menu */}
+        {/* User Persona & Menu (Reddit Profile Format: Name + Role Subtitle) */}
         <div style={{ position: 'relative' }}>
           <button
-            className="user-avatar-btn"
+            className="user-profile-header-chip"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            title="User Profile & Persona Switcher"
           >
             <div className="avatar-badge">{currentUser.avatar}</div>
-            <ChevronDown size={14} color="#64748b" />
+            <div className="user-profile-header-meta">
+              <span className="user-profile-header-name">{currentUser.name}</span>
+              <span className="user-profile-header-role">
+                {currentUser.role === 'community_leader' ? 'Community Leader' : 'Verified Resident'}
+              </span>
+            </div>
+            <ChevronDown size={14} className="user-profile-header-chevron" />
           </button>
 
           {isUserMenuOpen && (

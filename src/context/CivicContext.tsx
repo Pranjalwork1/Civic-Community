@@ -55,6 +55,7 @@ interface CivicContextType {
   selectedRadiusKm: number;
   isLocationModalOpen: boolean;
   includeDemoDataInFeed: boolean;
+  isAiDrawerOpen: boolean;
 
   // Navigation & Setters
   setActiveView: (view: ActiveView) => void;
@@ -73,6 +74,7 @@ interface CivicContextType {
   setSelectedRadiusKm: (radius: number) => void;
   setIsLocationModalOpen: (open: boolean) => void;
   setIncludeDemoDataInFeed: (include: boolean) => void;
+  setIsAiDrawerOpen: (open: boolean) => void;
 
   // Actions
   toggleGesture: (incidentId: string, gestureKey: keyof CivicGestures) => void;
@@ -160,6 +162,7 @@ export const CivicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedRadiusKm, setSelectedRadiusKm] = useState<number>(5);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [includeDemoDataInFeed, setIncludeDemoDataInFeed] = useState(true);
+  const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
   const [rooms, setRooms] = useState<CommunityRoom[]>(() => storageService.loadRooms());
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
   const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>(() => storageService.loadMessages());
@@ -1023,6 +1026,7 @@ export const CivicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         selectedRadiusKm,
         isLocationModalOpen,
         includeDemoDataInFeed,
+        isAiDrawerOpen,
 
         setActiveView,
         setCurrentIncidentId,
@@ -1039,6 +1043,7 @@ export const CivicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedRadiusKm,
         setIsLocationModalOpen,
         setIncludeDemoDataInFeed,
+        setIsAiDrawerOpen,
 
         toggleGesture,
         updateDraft,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Eye,
   EyeOff,
@@ -14,14 +14,24 @@ import {
   CheckCircle,
   AlertTriangle,
   PlusCircle,
-  SlidersHorizontal,
   Compass,
   ArrowRight,
   ShieldAlert,
   Flame,
-  Radio,
-  Map,
-  CheckCircle2,
+  Clock,
+  TrendingUp,
+  SlidersHorizontal,
+  MoreHorizontal,
+  HelpCircle,
+  Layers,
+  Activity,
+  Check,
+  Zap,
+  Droplets,
+  Trash2,
+  CloudRain,
+  Building2,
+  Waves,
 } from 'lucide-react';
 import { useCivic } from '../../context/CivicContext';
 import { ISSUE_CATEGORIES } from '../../data/categories';
@@ -47,8 +57,12 @@ export const ExploreFeed: React.FC = () => {
     selectedRadiusKm,
     setSelectedRadiusKm,
     setIsLocationModalOpen,
-    setSelectedLocation,
   } = useCivic();
+
+  // Sort & Time Filter states
+  const [sortBy, setSortBy] = useState<'recent' | 'activity' | 'closest' | 'community'>('recent');
+  const [timeFilter, setTimeFilter] = useState<'24h' | '7d' | '30d' | 'all'>('all');
+  const [openCardMenuId, setOpenCardMenuId] = useState<string | null>(null);
 
   const handleStartReport = () => {
     resetDraft();
@@ -67,7 +81,7 @@ export const ExploreFeed: React.FC = () => {
     setIsConsolidationModalOpen(true);
   };
 
-  // Attach real geographic distances from selected browsing location
+  // Calculate real geographic distance for all incidents
   const incidentsWithDistance = incidents.map((inc) => {
     const dist = selectedLocation
       ? calculateDistanceKm(
@@ -80,7 +94,7 @@ export const ExploreFeed: React.FC = () => {
     return { ...inc, distanceKm: dist };
   });
 
-  // Filter incidents strictly based on location radius and feed criteria
+  // Filter incidents strictly based on location radius, search, category, and tabs
   const filteredIncidents = incidentsWithDistance.filter((inc) => {
     // Proximity / Radius filter:
     if (selectedLocation) {
@@ -89,7 +103,7 @@ export const ExploreFeed: React.FC = () => {
       }
     }
 
-    // Search query
+    // Search query: supports title, description, category, reference, locality, landmarks
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const match =
@@ -107,133 +121,192 @@ export const ExploreFeed: React.FC = () => {
       if (inc.categoryId !== activeCategoryFilter) return false;
     }
 
-    // Tab filter
+    // Feed Tabs filtering
     if (activeFeedTab === 'unresolved') {
       return inc.status !== 'resolved';
     }
     if (activeFeedTab === 'resolved') {
       return inc.status === 'resolved';
     }
+    if (activeFeedTab === 'needs_attention') {
+      return inc.severity === 'high' || inc.counts.witnesses > 10;
+    }
+    if (activeFeedTab === 'communities') {
+      return inc.counts.uniqueContributors >= 50 || inc.status === 'room_active' || !!inc.roomId;
+    }
+
+    // Time filter
+    if (timeFilter === '24h') {
+      return inc.createdAt.includes('hour') || inc.createdAt.includes('Just now') || inc.createdAt.includes('minute') || inc.createdAt.includes('Today');
+    }
+    if (timeFilter === '7d') {
+      return !inc.createdAt.includes('month') && !inc.createdAt.includes('year');
+    }
+
     return true;
   });
 
-  // Sort: nearby tab sorts by distance
+  // Sorting logic
   const sortedIncidents = [...filteredIncidents].sort((a, b) => {
-    if (activeFeedTab === 'nearby') {
+    if (sortBy === 'closest' || activeFeedTab === 'nearby') {
       return (a.distanceKm ?? 9999) - (b.distanceKm ?? 9999);
     }
-    return 0;
+    if (sortBy === 'community') {
+      return b.counts.uniqueContributors - a.counts.uniqueContributors;
+    }
+    if (sortBy === 'activity' || activeFeedTab === 'recently_updated') {
+      const aScore = a.counts.witnesses + a.counts.affected + a.counts.discussions;
+      const bScore = b.counts.witnesses + b.counts.affected + b.counts.discussions;
+      return bScore - aScore;
+    }
+    return 0; // Default most recent
   });
 
-  const totalContributorsInLocality = incidents.reduce(
-    (acc, curr) => acc + curr.counts.witnesses + curr.counts.affected,
-    0
-  );
-  const openCount = incidents.filter((i) => i.status !== 'resolved').length;
-  const resolvedCount = incidents.filter((i) => i.status === 'resolved').length;
-
   return (
-    <div className="center-content" role="region" aria-label="Community Feed">
-      {/* 1. COMPACT COMMUNITY HEADER (Section 6) */}
-      <section className="compact-community-header" aria-label="Community Overview">
-        <div className="community-header-main-row">
-          <div className="community-header-text">
-            <span className="community-pre-label">COMMUNITY WORKSPACE</span>
-            <h1 className="community-locality-title">
-              {selectedLocation ? selectedLocation.locality : 'Knowledge Park III'}
-            </h1>
-            <div className="community-city-sub">
-              {selectedLocation ? selectedLocation.city : 'Greater Noida'}
-            </div>
-            <p className="community-tagline">
-              "Your community. One voice. Real civic action."
-            </p>
-          </div>
-
-          <div className="community-header-right-action">
-            <div className="community-avatar-pile">
-              <span className="pile-avatar c1">AS</span>
-              <span className="pile-avatar c2">RM</span>
-              <span className="pile-avatar c3">KI</span>
-              <span className="pile-counter">+{totalContributorsInLocality || 42}</span>
-            </div>
-            <button className="btn-community-create-report" onClick={handleStartReport}>
-              <PlusCircle size={15} />
-              <span>Create Report</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Community Vital Metrics Pills (Section 6) */}
-        <div className="community-vitals-row">
-          <span className="vital-chip">
-            <strong>{totalContributorsInLocality || 42}</strong> active contributors
+    <div className="center-content" role="region" aria-label="Central Civic Feed">
+      {/* ====================================================================
+          1. REDDIT-INSPIRED LOCATION & FEED FILTER BAR (Directly matching screenshot)
+          ==================================================================== */}
+      <section className="reddit-filter-bar" aria-label="Feed Filters and Sorting">
+        {/* Left: Location Dropdown Pill */}
+        <button
+          className="filter-location-pill"
+          onClick={() => setIsLocationModalOpen(true)}
+          title="Change browsing location"
+        >
+          <span className="location-flag-badge">📍</span>
+          <span className="location-name-label">
+            {selectedLocation ? selectedLocation.locality : 'Knowledge Park III, Greater Noida'}
           </span>
-          <span className="vital-chip">
-            <strong>{openCount}</strong> open incidents
-          </span>
-          <span className="vital-chip success">
-            <strong>{resolvedCount || 7}</strong> resolved
-          </span>
-        </div>
+          <ChevronDown size={14} className="location-chevron" />
+        </button>
 
-        {/* Feed Filter Navigation Tabs (Section 6) */}
-        <div className="community-nav-tabs">
+        {/* Center: Feed Ranking Tabs (All, Hot/Nearby, New/Unresolved, Rising/Recently Updated, etc.) */}
+        <div className="filter-tabs-row">
           {[
-            { id: 'for_you', label: 'For You' },
+            { id: 'all', label: 'All' },
             { id: 'nearby', label: 'Nearby' },
             { id: 'unresolved', label: 'Unresolved' },
-            { id: 'recently_updated', label: 'Recently Updated' },
+            { id: 'recently_updated', label: 'Rising' }, // Vibrant orange active pill matching Reddit ref screenshot!
+            { id: 'needs_attention', label: 'Needs Attention' },
             { id: 'resolved', label: 'Resolved' },
+            { id: 'communities', label: 'Communities' },
           ].map((tab) => (
             <button
               key={tab.id}
-              className={`community-tab-link ${activeFeedTab === tab.id ? 'active' : ''}`}
+              className={`filter-tab-btn ${activeFeedTab === tab.id ? 'active' : ''}`}
               onClick={() => setActiveFeedTab(tab.id)}
             >
               {tab.label}
             </button>
           ))}
         </div>
+
+        {/* Right: Sorting & Time Dropdowns */}
+        <div className="filter-dropdowns-group">
+          {/* Sort Selector */}
+          <select
+            className="filter-select-dropdown"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            aria-label="Sort Incidents"
+          >
+            <option value="recent">Most Recent</option>
+            <option value="activity">Recent Activity</option>
+            <option value="closest">Closest</option>
+            <option value="community">Most Community Action</option>
+          </select>
+
+          {/* Time Filter Dropdown (like Past 24 Hours in screenshot) */}
+          <select
+            className="filter-select-dropdown"
+            value={timeFilter}
+            onChange={(e) => setTimeFilter(e.target.value as any)}
+            aria-label="Time Window"
+          >
+            <option value="24h">Past 24 Hours</option>
+            <option value="7d">Past 7 Days</option>
+            <option value="30d">Past 30 Days</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
       </section>
 
-      {/* 2. REPORT CREATION COMPOSER BAR (Section 7) */}
-      <section className="prominent-report-composer" onClick={handleStartReport}>
-        <div className="composer-prompt-row">
-          <div className="composer-avatar-chip">CS</div>
-          <div className="composer-prompt-text">
-            What civic issue or hazard did you notice in {selectedLocation?.locality || 'your community'}?
-          </div>
+      {/* ====================================================================
+          2. HORIZONTAL CATEGORY CHIPS ROW (Section 8: Scrollable, no page overflow)
+          ==================================================================== */}
+      <div className="categories-scroll-wrapper" aria-label="Issue Categories">
+        <div className="categories-scroll-track">
+          <button
+            className={`category-filter-pill ${activeCategoryFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveCategoryFilter('all')}
+          >
+            All Categories
+          </button>
+          {ISSUE_CATEGORIES.map((cat) => {
+            const renderCatIcon = (iconName: string) => {
+              switch (iconName) {
+                case 'Zap': return <Zap size={13} color="#f59e0b" />;
+                case 'Trash2': return <Trash2 size={13} color="#10b981" />;
+                case 'Waves': return <Waves size={13} color="#0284c7" />;
+                case 'Droplets': return <Droplets size={13} color="#06b6d4" />;
+                case 'CloudRain': return <CloudRain size={13} color="#3b82f6" />;
+                case 'Building2': return <Building2 size={13} color="#8b5cf6" />;
+                case 'Users2': return <Users size={13} color="#ec4899" />;
+                case 'ShieldAlert': return <ShieldAlert size={13} color="#ef4444" />;
+                default: return <Compass size={13} color="#64748b" />;
+              }
+            };
+            return (
+              <button
+                key={cat.id}
+                className={`category-filter-pill ${activeCategoryFilter === cat.id ? 'active' : ''}`}
+                onClick={() => setActiveCategoryFilter(cat.id)}
+              >
+                <span className="cat-pill-icon">{renderCatIcon(cat.icon)}</span>
+                <span>{cat.name}</span>
+              </button>
+            );
+          })}
         </div>
+      </div>
 
-        <div className="composer-actions-row">
+      {/* ====================================================================
+          3. COMPACT REPORT CREATOR BAR
+          ==================================================================== */}
+      <section className="reddit-composer-box" onClick={handleStartReport}>
+        <div className="composer-avatar-circle">CS</div>
+        <div className="composer-input-placeholder">
+          What civic issue or hazard did you observe in {selectedLocation?.locality || 'your community'}?
+        </div>
+        <div className="composer-quick-actions">
           <button
             type="button"
-            className="composer-action-btn"
+            className="composer-quick-btn"
             onClick={(e) => {
               e.stopPropagation();
               handleStartReport();
             }}
+            title="Open Camera"
           >
             <Camera size={15} color="#FF4D1A" />
             <span>Camera</span>
           </button>
-
           <button
             type="button"
-            className="composer-action-btn"
+            className="composer-quick-btn"
             onClick={(e) => {
               e.stopPropagation();
               handleStartReport();
             }}
+            title="Use current location"
           >
-            <MapPin size={15} color="#2878D0" />
-            <span>Use Current Location</span>
+            <MapPin size={15} color="#0284c7" />
+            <span>Location</span>
           </button>
-
           <button
             type="button"
-            className="composer-submit-btn"
+            className="composer-create-action-btn"
             onClick={(e) => {
               e.stopPropagation();
               handleStartReport();
@@ -244,80 +317,20 @@ export const ExploreFeed: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. ISSUE CATEGORY PILLS (Section 8: Horizontally Scrollable) */}
-      <div className="categories-scroll-wrapper">
-        <div className="categories-scroll-track">
-          <button
-            className={`category-pill-btn ${activeCategoryFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveCategoryFilter('all')}
-          >
-            All
-          </button>
-          {ISSUE_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              className={`category-pill-btn ${activeCategoryFilter === cat.id ? 'active' : ''}`}
-              onClick={() => setActiveCategoryFilter(cat.id)}
-            >
-              <span>{cat.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 4. LOCATION CONTEXT BAR (Section 9) */}
-      <div className="location-context-bar">
-        <div className="context-left">
-          <MapPin size={14} color="#2878D0" />
-          <span className="context-label">
-            Showing civic issues within <strong>{selectedRadiusKm} km</strong> of{' '}
-            {selectedLocation ? selectedLocation.locality : 'Knowledge Park III'}
-          </span>
-          <button
-            className="context-change-link"
-            onClick={() => setIsLocationModalOpen(true)}
-          >
-            [Change location]
-          </button>
-        </div>
-
-        <div className="context-right">
-          <select
-            value={selectedRadiusKm}
-            onChange={(e) => setSelectedRadiusKm(Number(e.target.value))}
-            className="context-radius-select"
-            aria-label="Filter Radius"
-          >
-            <option value={2}>2 km</option>
-            <option value={5}>5 km</option>
-            <option value={10}>10 km</option>
-            <option value={25}>25 km</option>
-          </select>
-
-          <button
-            className="context-map-btn"
-            onClick={() => {
-              setActiveFeedTab('nearby');
-            }}
-            title="Sort by proximity"
-          >
-            <Map size={13} />
-            <span>Map View</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 5. INCIDENT FEED CARDS OR COMPACT EMPTY STATE (Section 10 & 15) */}
+      {/* ====================================================================
+          4. CENTRAL INCIDENT CARDS (Clean White Reddit-Style Post Cards)
+          ==================================================================== */}
       {sortedIncidents.length === 0 ? (
+        /* Compact Empty State (Section 10) */
         <div className="compact-empty-state">
-          <div className="empty-state-icon-circle">
+          <div className="empty-state-icon-wrap">
             <MapPin size={24} />
           </div>
-          <h3 className="empty-state-title">No civic issues reported nearby</h3>
+          <h3 className="empty-state-title">No civic issues reported nearby yet</h3>
           <p className="empty-state-sub">
-            Be the first person to report a problem in your community.
+            Be the first person to document and report a problem in {selectedLocation?.locality || 'this neighborhood'}.
           </p>
-          <div className="empty-state-btn-row">
+          <div className="empty-state-actions">
             <button className="btn-empty-report" onClick={handleStartReport}>
               <PlusCircle size={15} />
               <span>Report a Civic Issue</span>
@@ -327,7 +340,7 @@ export const ExploreFeed: React.FC = () => {
               onClick={() => setIsLocationModalOpen(true)}
             >
               <Compass size={15} />
-              <span>Explore Nearby Radar</span>
+              <span>Choose Another Location</span>
             </button>
           </div>
         </div>
@@ -339,83 +352,107 @@ export const ExploreFeed: React.FC = () => {
             incident.severity === 'high' || incident.categoryId === 'electricity_lighting';
 
           return (
-            <article key={incident.id} className="civic-feed-card">
-              {/* Card Header: Author, Locality, Time, Ref */}
-              <div className="feed-card-header">
-                <div className="feed-card-author-left">
-                  <div className="author-avatar-chip">{incident.reporter.avatar}</div>
-                  <div className="author-meta-block">
-                    <div className="author-name-line">
-                      <span className="author-name">{incident.reporter.name}</span>
-                      <span className="meta-sep">•</span>
-                      <span className="author-time">{incident.createdAt}</span>
-                    </div>
-                    <div className="author-location-line">
-                      <MapPin size={11} color="#2878D0" />
-                      <span>{incident.locality}</span>
-                      <span className="meta-sep">•</span>
-                      <span className="incident-ref-id">Ref: {incident.reference}</span>
-                    </div>
+            <article key={incident.id} className="reddit-incident-card">
+              {/* A. Report Header: Author, Date, Locality, Ref, Category */}
+              <div className="card-header-line">
+                <div className="card-header-left">
+                  <div className="card-author-avatar">{incident.reporter.avatar}</div>
+                  <div className="card-meta-line">
+                    <span className="card-posted-by">Posted by : </span>
+                    <strong className="card-author-name">{incident.reporter.name}</strong>
+                    <span className="card-meta-sep">|</span>
+                    <span className="card-timestamp">{incident.createdAt}</span>
+                    <span className="card-meta-sep">|</span>
+                    <span className="card-locality-tag">
+                      <MapPin size={11} className="inline-pin-icon" />
+                      {incident.locality}
+                    </span>
+                    <span className="card-meta-sep">|</span>
+                    <span className="card-ref-badge">{incident.reference}</span>
                   </div>
                 </div>
 
-                <div className="feed-card-header-right">
+                <div className="card-header-right">
                   {isUrgentHazard && (
-                    <span className="urgent-hazard-tag">
+                    <span className="card-hazard-pill">
                       <ShieldAlert size={12} />
-                      <span>Safety Hazard</span>
+                      <span>Urgent Hazard</span>
                     </span>
                   )}
-                  <span className="category-badge-chip">{incident.category}</span>
+                  <span className="card-category-pill">{incident.category}</span>
+                  <button
+                    className="card-overflow-btn"
+                    onClick={() => setOpenCardMenuId(openCardMenuId === incident.id ? null : incident.id)}
+                    title="More actions"
+                  >
+                    <MoreHorizontal size={15} />
+                  </button>
                 </div>
               </div>
 
-              {/* Title & Landmark */}
-              <h2 className="feed-card-title" onClick={() => handleOpenIncident(incident)}>
+              {/* B. Incident Heading */}
+              <h2
+                className="card-incident-heading"
+                onClick={() => handleOpenIncident(incident)}
+              >
                 {incident.title}
               </h2>
-              <div className="feed-card-landmark-row">
-                <MapPin size={13} className="landmark-icon" />
-                <span>{incident.landmark}</span>
-                {incident.distanceKm !== undefined && (
-                  <span className="landmark-distance-away">
-                    · {formatDistance(incident.distanceKm)} away
-                  </span>
-                )}
-              </div>
 
-              {/* Description */}
-              <p className="feed-card-desc">{incident.description}</p>
+              {/* C. Description Preview */}
+              <p className="card-incident-description">{incident.description}</p>
 
-              {/* Photo Evidence Preview */}
+              {/* D. Evidence Photograph with Geotag Context */}
               {incident.evidence.length > 0 && (
                 <div
-                  className="feed-card-image-box"
+                  className="card-evidence-frame"
                   onClick={() => handleOpenIncident(incident)}
                 >
                   <img
                     src={incident.evidence[0].url}
                     alt={incident.title}
-                    className="feed-card-img"
+                    className="card-evidence-image"
                   />
-                  <div className="feed-image-caption">
-                    Evidence · {incident.evidence[0].contributorName} · {incident.evidence[0].timestamp}
+                  <div className="card-geotag-banner">
+                    <div className="geotag-banner-left">
+                      <MapPin size={12} className="geotag-pin" />
+                      <span>
+                        {incident.locality} · Coordinates: {incident.location.lat.toFixed(4)}° N, {incident.location.lng.toFixed(4)}° E
+                      </span>
+                    </div>
+                    <span className="geotag-verified-badge">✓ Geotag Verified</span>
                   </div>
                 </div>
               )}
 
-              {/* Incident Matching Visualization (Section 12: AI Intelligence Indicator) */}
-              {incident.aiSuggestion && incident.aiSuggestion.relatedReportCount > 0 && (
-                <div className="incident-cluster-ai-banner">
-                  <div className="cluster-banner-text">
-                    <Sparkles size={14} className="sparkle-agent-icon" />
-                    <span>
-                      CivicSignal detected <strong>{incident.aiSuggestion.relatedReportCount}</strong> related reports
-                      (Same location · Similar evidence · Proximity cluster)
-                    </span>
+              {/* E. Location & Landmark Info */}
+              <div className="card-location-row">
+                <MapPin size={13} className="landmark-pin" />
+                <span className="landmark-title">Landmark: {incident.landmark}</span>
+                {incident.distanceKm !== undefined && (
+                  <span className="landmark-distance-pill">
+                    · {formatDistance(incident.distanceKm)} from your browsing location
+                  </span>
+                )}
+              </div>
+
+              {/* AI Incident Cluster Detection Intelligence Indicator (Section 12) */}
+              {incident.aiSuggestion?.groupingStatus === 'reviewed' && (
+                <div className="card-ai-cluster-banner">
+                  <div className="ai-cluster-left">
+                    <div className="ai-cluster-heading">
+                      <Sparkles size={14} />
+                      <span>CivicSignal detected 17 related reports</span>
+                    </div>
+                    <div className="ai-cluster-factors">
+                      <span>📍 Same location</span>
+                      <span>•</span>
+                      <span>🖼 Similar evidence</span>
+                      <span>•</span>
+                      <span>📝 Similar issue description</span>
+                    </div>
                   </div>
                   <button
-                    className="cluster-review-action-btn"
+                    className="ai-cluster-view-btn"
                     onClick={(e) => handleOpenReviewGrouping(e, incident)}
                   >
                     View Incident Cluster
@@ -423,21 +460,21 @@ export const ExploreFeed: React.FC = () => {
                 </div>
               )}
 
-              {/* Incident Room Threshold Progress (Section 13) */}
-              <div className="incident-room-progress-card">
-                <div className="room-progress-label-row">
-                  <span className="room-progress-title">
+              {/* Community Status & Contributor Progress Toward 50-Person Room */}
+              <div className="card-community-progress-box">
+                <div className="progress-box-header">
+                  <span className="progress-status-title">
                     {isRoomActive
-                      ? '🏛️ Community Incident Room Activated'
-                      : 'Community Room Activation Progress'}
+                      ? '🏛 Community Incident Room Created (Threshold Reached)'
+                      : `Community Gathering Evidence: ${incident.counts.uniqueContributors} / 50 contributors`}
                   </span>
-                  <span className="room-progress-counter">
-                    <strong>{incident.counts.uniqueContributors}</strong> / 50 contributors
+                  <span className="progress-status-chip">
+                    {isRoomActive ? '✓ Room Active' : `${Math.round((incident.counts.uniqueContributors / 50) * 100)}%`}
                   </span>
                 </div>
-                <div className="room-progress-bar-track">
+                <div className="progress-track-bar">
                   <div
-                    className="room-progress-bar-fill"
+                    className={`progress-fill-bar ${isRoomActive ? 'active-room' : ''}`}
                     style={{
                       width: `${Math.min(100, (incident.counts.uniqueContributors / 50) * 100)}%`,
                     }}
@@ -445,78 +482,97 @@ export const ExploreFeed: React.FC = () => {
                 </div>
               </div>
 
-              {/* Civic Gestures Action Toolbar (Section 11 & 24) */}
-              <div className="feed-card-gestures-toolbar">
-                {/* 1. "I saw it" / "I didn't see it" (Mutually Exclusive) */}
-                <div className="gestures-segmented-control" role="group" aria-label="Incident observation">
+              {/* F. Civic Activity Summary Counters */}
+              <div className="card-civic-vitals-row">
+                <span className="vital-stat">
+                  👁 <strong>{incident.counts.witnesses}</strong> saw it
+                </span>
+                <span className="vital-stat-sep">•</span>
+                <span className="vital-stat">
+                  ○ <strong>{incident.counts.didNotSeeCount || 0}</strong> didn't see
+                </span>
+                <span className="vital-stat-sep">•</span>
+                <span className="vital-stat">
+                  ⚠️ <strong>{incident.counts.affected}</strong> affected
+                </span>
+                <span className="vital-stat-sep">•</span>
+                <span className="vital-stat">
+                  📷 <strong>{incident.counts.evidenceItems || incident.evidence.length}</strong> evidence
+                </span>
+                <span className="vital-stat-sep">•</span>
+                <span className="vital-stat">
+                  💬 <strong>{incident.counts.discussions}</strong> discussions
+                </span>
+              </div>
+
+              {/* G. Action Row: Civic Gestures (Section 7: Mutually Exclusive Observation Selector) */}
+              <div className="card-action-gestures-row">
+                {/* Mutually Exclusive "I Saw It" vs "I Didn't See It" */}
+                <div className="observation-pair-control">
                   <button
                     type="button"
-                    className={`gesture-obs-btn saw-it ${incident.userGestures.witnessed ? 'selected' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleGesture(incident.id, 'witnessed');
-                    }}
-                    title="Confirm you saw this civic issue"
+                    className={`obs-toggle-btn obs-saw-it ${incident.userGestures.witnessed ? 'selected' : ''}`}
+                    onClick={() => toggleGesture(incident.id, 'witnessed')}
+                    title="Personally observed this issue (contributes to verification)"
                   >
-                    <Eye size={14} />
-                    <span>I saw this</span>
-                    <span className="gesture-count-chip">{incident.counts.witnesses}</span>
+                    <Check size={13} />
+                    <span>I Saw It</span>
+                    <span className="obs-counter-pill">{incident.counts.witnesses}</span>
                   </button>
 
                   <button
                     type="button"
-                    className={`gesture-obs-btn did-not-see ${incident.userGestures.didNotSee ? 'selected' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleGesture(incident.id, 'didNotSee');
-                    }}
-                    title="Report that you checked and did not see this"
+                    className={`obs-toggle-btn obs-did-not-see ${incident.userGestures.didNotSee ? 'selected' : ''}`}
+                    onClick={() => toggleGesture(incident.id, 'didNotSee')}
+                    title="Passed this area but did not observe the issue (neutral observation)"
                   >
-                    <EyeOff size={14} />
-                    <span>I didn't see it</span>
-                    <span className="gesture-count-chip">{incident.counts.didNotSeeCount ?? 0}</span>
+                    <EyeOff size={13} />
+                    <span>I Didn't See It</span>
+                    <span className="obs-counter-pill">{incident.counts.didNotSeeCount || 0}</span>
                   </button>
                 </div>
 
-                {/* Additional Meaningful Civic Gestures (Section 11) */}
-                <div className="gestures-secondary-group">
+                {/* Secondary Civic Actions */}
+                <div className="secondary-gestures-stack">
                   <button
                     type="button"
-                    className={`gesture-action-chip ${incident.userGestures.affected ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleGesture(incident.id, 'affected');
-                    }}
-                    title="Impacts your daily routine or residence"
-                  >
-                    <MapPin size={13} />
-                    <span>Same issue here ({incident.counts.affected})</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="gesture-action-chip"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenIncident(incident);
-                    }}
-                    title="Join incident or contribute photo corroboration"
+                    className={`gesture-action-pill ${incident.userGestures.affected ? 'active' : ''}`}
+                    onClick={() => toggleGesture(incident.id, 'affected')}
+                    title="I am affected by this issue"
                   >
                     <Users size={13} />
-                    <span>Join incident ({incident.counts.evidenceItems})</span>
+                    <span>I'm Affected</span>
+                    {incident.counts.affected > 0 && <span className="gesture-sub-count">{incident.counts.affected}</span>}
                   </button>
 
                   <button
                     type="button"
-                    className="gesture-action-chip"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenIncident(incident);
-                    }}
-                    title="View community discussions"
+                    className="gesture-action-pill"
+                    onClick={() => handleOpenIncident(incident)}
+                    title="Add photo evidence"
                   >
-                    <MessageSquare size={13} />
-                    <span>{incident.counts.discussions}</span>
+                    <Camera size={13} />
+                    <span>Add Evidence</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`gesture-action-pill ${incident.userGestures.stillHappening ? 'active' : ''}`}
+                    onClick={() => toggleGesture(incident.id, 'stillHappening')}
+                    title="This issue is still ongoing"
+                  >
+                    <Activity size={13} />
+                    <span>Still Happening</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`gesture-action-pill ${incident.userGestures.followed ? 'active' : ''}`}
+                    onClick={() => toggleGesture(incident.id, 'followed')}
+                    title="Follow updates for this incident"
+                  >
+                    <Bookmark size={13} />
+                    <span>Follow</span>
                   </button>
                 </div>
               </div>

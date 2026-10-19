@@ -87,6 +87,16 @@ export async function requestBrowserGeolocation(): Promise<GeolocationResult> {
  */
 export const PRESET_LOCATIONS: UserSelectedLocation[] = [
   {
+    name: 'Knowledge Park III, Greater Noida',
+    locality: 'Knowledge Park III',
+    city: 'Greater Noida',
+    state: 'Uttar Pradesh',
+    lat: 28.4619,
+    lng: 77.4988,
+    accuracy: '±15m',
+    source: 'sample',
+  },
+  {
     name: 'Basavanagudi, Bengaluru',
     locality: 'Basavanagudi',
     city: 'Bengaluru',
