@@ -499,10 +499,10 @@ export const ExploreFeed: React.FC = () => {
                 {incident.title}
               </h2>
               <div className="card-landmark">
-                <MapPin size={13} style={{ display: 'inline', marginRight: '4px' }} />
+                <MapPin size={13} className="landmark-pin-icon" />
                 <span>{incident.landmark}</span>
                 {incident.distanceKm !== undefined && (
-                  <span style={{ color: '#2878D0', fontWeight: 600, marginLeft: '6px' }}>
+                  <span className="landmark-distance-pill">
                     · {formatDistance(incident.distanceKm)} away
                   </span>
                 )}
@@ -534,15 +534,15 @@ export const ExploreFeed: React.FC = () => {
                 <span>
                   <strong>{incident.counts.witnesses}</strong> saw it
                 </span>
-                <span>·</span>
+                <span className="counter-dot-sep">·</span>
                 <span>
                   <strong>{incident.counts.didNotSeeCount ?? 0}</strong> didn't see
                 </span>
-                <span>·</span>
+                <span className="counter-dot-sep">·</span>
                 <span>
                   <strong>{incident.counts.affected}</strong> affected
                 </span>
-                <span>·</span>
+                <span className="counter-dot-sep">·</span>
                 <span>
                   <strong>{incident.counts.evidenceItems}</strong> evidence items
                 </span>

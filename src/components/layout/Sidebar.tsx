@@ -49,26 +49,10 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="left-sidebar">
-      {/* Brand Header for Left Column */}
-      <div className="sidebar-brand-header">
-        <button
-          className="sidebar-brand-btn"
-          onClick={() => {
-            setActiveCategoryFilter('all');
-            setActiveView('explore');
-          }}
-          title="CivicSignal Home"
-        >
-          <div className="sidebar-brand-icon">
-            <ShieldAlert size={18} />
-          </div>
-          <span className="sidebar-brand-title">CivicSignal</span>
-        </button>
-      </div>
-
       <div className="sidebar-scrollable-content">
         {/* Navigation Group 1: Feeds */}
         <div className="sidebar-nav-group">
+          <div className="sidebar-group-title">FEEDS</div>
           <button
             className={`sidebar-nav-item ${activeView === 'explore' && activeCategoryFilter === 'all' ? 'active-pill' : ''}`}
             onClick={() => {

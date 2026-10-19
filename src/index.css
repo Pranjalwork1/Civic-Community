@@ -1864,13 +1864,16 @@ a {
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
+  position: relative;
   user-select: none;
+  box-sizing: border-box;
 }
 
 .window-header-left {
   display: flex;
   align-items: center;
   gap: 16px;
+  z-index: 2;
 }
 
 .window-dots-group {
@@ -1929,6 +1932,9 @@ a {
 }
 
 .window-url-pill {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1940,6 +1946,7 @@ a {
   color: #334155;
   max-width: 440px;
   transition: all 0.15s ease;
+  z-index: 1;
 }
 
 .window-url-pill:hover {
@@ -2429,22 +2436,31 @@ a {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
-  padding: 2px;
-  gap: 2px;
+  padding: 3px;
+  gap: 3px;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .obs-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 5px 12px;
-  border-radius: 18px;
-  font-size: 12.5px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 16px;
+  font-size: 12px;
   font-weight: 600;
   color: #64748b;
   background: transparent;
   transition: all 0.15s ease;
   user-select: none;
+  box-sizing: border-box;
+}
+
+.obs-btn svg {
+  flex-shrink: 0;
 }
 
 .obs-btn:hover {
@@ -2475,10 +2491,14 @@ a {
 }
 
 .obs-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 10px;
+  padding: 0 6px;
+  height: 18px;
+  border-radius: 9px;
   background: #e2e8f0;
   color: #475569;
   transition: all 0.15s ease;
@@ -2495,8 +2515,10 @@ a {
 .action-pill-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
   border-radius: 18px;
   font-size: 12px;
   font-weight: 600;
@@ -2504,6 +2526,11 @@ a {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.action-pill-btn svg {
+  flex-shrink: 0;
 }
 
 .action-pill-btn:hover {
@@ -2516,6 +2543,39 @@ a {
   background: rgba(40, 120, 208, 0.1);
   color: #2878D0;
   border-color: rgba(40, 120, 208, 0.3);
+}
+
+.card-landmark {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.landmark-pin-icon {
+  flex-shrink: 0;
+  color: #2878D0;
+}
+
+.landmark-distance-pill {
+  color: #2878D0;
+  font-weight: 600;
+}
+
+.card-counters-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+.counter-dot-sep {
+  color: #cbd5e1;
+  font-weight: 700;
 }
 
 .feed-footer-disclaimer {
