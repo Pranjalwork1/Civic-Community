@@ -52,7 +52,7 @@ def main():
     active_state = not args.inactive
 
     print("=" * 70)
-    print("🤖 CivicSignal Agentverse Registration Tool")
+    print("CivicSignal Agentverse Registration Tool")
     print("=" * 70)
     print(f"Agent Name:    {args.name or settings.AGENT_NAME}")
     endpoint_to_use = (
@@ -67,7 +67,7 @@ def main():
     print("-" * 70)
 
     if not settings.AGENTVERSE_KEY:
-        print("\n❌ Error: AGENTVERSE_KEY is not set.")
+        print("\n[ERROR] AGENTVERSE_KEY is not set.")
         print("Please configure AGENTVERSE_KEY in backend/.env or your environment:")
         print("1. Log in to https://agentverse.ai")
         print("2. Go to Profile / API Keys and create a new key.")
@@ -82,7 +82,7 @@ def main():
 
     print("\n" + "=" * 70)
     if result["success"]:
-        print("✅ AGENTVERSE REGISTRATION SUCCEEDED!")
+        print("[SUCCESS] AGENTVERSE REGISTRATION SUCCEEDED!")
         print(f"Message:       {result['message']}")
         print(f"Agent Name:    {result['agent_name']}")
         print(f"Endpoint URL:  {result['endpoint']}")
@@ -94,7 +94,7 @@ def main():
         print("=" * 70)
         sys.exit(0)
     else:
-        print("❌ REGISTRATION FAILED")
+        print("[FAILED] REGISTRATION FAILED")
         print(f"Reason:        {result.get('error', 'Unknown error')}")
         print(f"Details:       {result.get('message', '')}")
         print("\nTroubleshooting tips:")
