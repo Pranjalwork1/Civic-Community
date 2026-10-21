@@ -1,27 +1,8 @@
 import React from 'react';
 import {
-  MapPin,
-  TrendingUp,
-  CheckCircle2,
-  AlertCircle,
-  ExternalLink,
-  Shield,
-  Clock,
-  Compass,
-  Edit2,
-  UserCheck,
-  RotateCcw,
-  Users,
-  ChevronRight,
-  Activity,
-  Flame,
-  Radio,
   Sparkles,
-  Bot,
-  ShieldAlert,
-  ArrowRight,
-  Check,
-  Zap,
+  MapPin,
+  ChevronRight,
 } from 'lucide-react';
 import { useCivic } from '../../context/CivicContext';
 import { calculateDistanceKm, formatDistance } from '../../services/locationService';
@@ -32,7 +13,6 @@ export const RightSidebar: React.FC = () => {
     wizardStep,
     reportDraft,
     incidents,
-    rooms,
     setCurrentIncidentId,
     setActiveView,
     selectedLocation,
@@ -62,44 +42,41 @@ export const RightSidebar: React.FC = () => {
       )
     : incidentsWithDistance.filter((i) => i.status !== 'resolved');
 
-  const urgentHazards = incidentsWithDistance.filter(
-    (i) => i.severity === 'critical' || i.categoryId === 'streetlighting_electrical'
-  );
-
-  const resolvedIncidents = incidentsWithDistance.filter((i) => i.status === 'resolved');
+  const localityName = selectedLocation?.locality || 'Knowledge Park III';
 
   if (activeView === 'report_wizard') {
     return (
-      <aside className="right-sidebar" aria-label="Reporting Guidelines">
+      <aside className="right-sidebar-container" aria-label="Reporting Guidelines">
         <div className="right-sidebar-card">
-          <div className="right-sidebar-card-title">Evidence & Privacy Guidelines</div>
-          <p className="right-sidebar-card-desc">
+          <h3 className="right-card-heading">EVIDENCE &amp; PRIVACY</h3>
+          <p className="right-card-text" style={{ marginTop: '8px' }}>
             One clear civic issue per report. High-contrast photo with recognizable street context or landmark ensures fast neighborhood corroboration.
           </p>
 
-          <div className="wizard-right-meta-row">
-            <span className="wizard-right-label">Confirmed Locality:</span>
-            <span className="wizard-right-val">
-              {reportDraft.location?.locality || selectedLocation?.locality || 'Not specified'}
-            </span>
-          </div>
-
-          <div className="wizard-right-meta-row">
-            <span className="wizard-right-label">Privacy Shield:</span>
-            <span className="wizard-right-val success">Active · Face blur encouraged</span>
+          <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#5C554F' }}>Confirmed Locality:</span>
+              <span style={{ fontWeight: 700, color: '#1B1A19' }}>
+                {reportDraft.location?.locality || localityName}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#5C554F' }}>Privacy Shield:</span>
+              <span style={{ fontWeight: 700, color: '#0F6B3A' }}>Active · Face blur encouraged</span>
+            </div>
           </div>
         </div>
 
         {wizardStep >= 2 && reportDraft.evidence.length > 0 && (
           <div className="right-sidebar-card">
-            <div className="right-sidebar-card-title">Evidence Preview</div>
-            <div className="wizard-evidence-preview-box">
+            <h3 className="right-card-heading">EVIDENCE PREVIEW</h3>
+            <div style={{ marginTop: '12px', borderRadius: '12px', overflow: 'hidden' }}>
               <img
                 src={reportDraft.evidence[0].geotaggedUrl || reportDraft.evidence[0].url}
                 alt="Draft Evidence"
-                className="wizard-evidence-img"
+                style={{ width: '100%', height: '180px', objectFit: 'cover' }}
               />
-              <div className="wizard-evidence-caption">
+              <div style={{ fontSize: '12px', color: '#5C554F', marginTop: '6px' }}>
                 {reportDraft.evidence[0].name} · Geotag verified
               </div>
             </div>
@@ -110,251 +87,148 @@ export const RightSidebar: React.FC = () => {
   }
 
   return (
-    <aside className="right-sidebar" aria-label="Community Context and Activity">
-      {/* ====================================================================
-          A. CIVICSIGNAL ASSISTANT (Hero Orange Card matching Reddit Premium in ref)
-          ==================================================================== */}
-      <div className="sidebar-hero-assistant-card">
-        <div className="hero-assistant-icon-row">
-          <div className="hero-assistant-icon-box">
-            <Sparkles size={20} />
+    <aside className="right-sidebar-container" aria-label="Assistant and Community Details">
+      {/* 1. AI Assistant Card */}
+      <section className="ai-assistant-card" aria-label="CivicSignal Assistant">
+        <div className="ai-card-top-row">
+          <div className="ai-icon-tile" aria-hidden="true">
+            <Sparkles size={18} strokeWidth={2} />
           </div>
-          <span className="hero-assistant-badge">AI COPILOT</span>
+          <span className="ai-copilot-pill">AI COPILOT</span>
         </div>
-        <h3 className="hero-assistant-title">CivicSignal Assistant</h3>
-        <p className="hero-assistant-desc">
-          Need help turning a local problem into action? Ask for hazard safety guidance, evidence tips, or petition rules.
+
+        <h2 className="ai-card-title">CivicSignal Assistant</h2>
+        <p className="ai-card-desc">
+          Ask for hazard safety guidance, evidence tips or petition rules, tailored to {localityName}.
         </p>
+
         <button
           type="button"
-          className="hero-assistant-action-btn"
+          className="ai-card-btn"
           onClick={() => setIsAiDrawerOpen(true)}
-          title="Open CivicSignal AI Assistant"
+          aria-label="Ask CivicSignal Assistant"
         >
-          <Bot size={15} />
-          <span>Ask CivicSignal</span>
-          <ArrowRight size={14} className="hero-btn-arrow" />
+          Ask CivicSignal
         </button>
-        <div className="hero-assistant-subtext">
-          <span>⚡ Localized guidance for {selectedLocation?.locality || 'your area'}</span>
-        </div>
-      </div>
+      </section>
 
-      {/* ====================================================================
-          B. YOUR COMMUNITIES (Section 9.B)
-          ==================================================================== */}
-      <div className="right-sidebar-card">
-        <div className="right-card-header-bar">
-          <span className="right-card-heading">YOUR COMMUNITIES</span>
+      {/* 2. YOUR COMMUNITIES Card */}
+      <section className="right-sidebar-card" aria-label="Your Communities">
+        <div className="right-card-header">
+          <h2 className="right-card-heading">YOUR COMMUNITIES</h2>
           <button
             type="button"
-            className="right-card-action-link"
+            className="right-card-link-btn"
             onClick={() => setIsLocationModalOpen(true)}
+            aria-label="View all communities"
           >
-            View All
+            View all
           </button>
         </div>
 
-        <div className="communities-compact-list">
-          <div className="community-compact-row active">
-            <div className="community-badge-dot bg-orange">
-              {selectedLocation?.locality ? selectedLocation.locality.slice(0, 2).toUpperCase() : 'KP'}
-            </div>
-            <div className="community-compact-info">
-              <span className="community-compact-name">
-                {selectedLocation ? selectedLocation.locality : 'Knowledge Park III'}
-              </span>
-              <span className="community-compact-meta">42 active contributors</span>
-            </div>
-            <span className="community-status-live">● Active</span>
-          </div>
-
+        <div className="communities-list" role="list">
+          {/* Row 1: Active Community (Knowledge Park III) */}
           <div
-            className="community-compact-row"
+            className="community-row active-community"
+            role="listitem"
             onClick={() => setIsLocationModalOpen(true)}
           >
-            <div className="community-badge-dot bg-blue">RS</div>
-            <div className="community-compact-info">
-              <span className="community-compact-name">Your Residential Society</span>
-              <span className="community-compact-meta">88 residents · Local RWA</span>
+            <div className="community-avatar-tile avatar-orange" aria-hidden="true">
+              KN
             </div>
+            <div className="community-meta-col">
+              <span className="community-name">{localityName}</span>
+              <span className="community-subtext">42 active contributors</span>
+            </div>
+            <span className="community-status-badge">Active</span>
           </div>
 
+          {/* Row 2: Your Residential Society */}
           <div
-            className="community-compact-row"
+            className="community-row"
+            role="listitem"
             onClick={() => setIsLocationModalOpen(true)}
           >
-            <div className="community-badge-dot bg-green">CC</div>
-            <div className="community-compact-info">
-              <span className="community-compact-name">Your College Community</span>
-              <span className="community-compact-meta">154 members · Campus Zone</span>
+            <div className="community-avatar-tile avatar-blue" aria-hidden="true">
+              RS
+            </div>
+            <div className="community-meta-col">
+              <span className="community-name">Your Residential Society</span>
+              <span className="community-subtext">88 residents · Local RWA</span>
             </div>
           </div>
 
+          {/* Row 3: Your College Community */}
           <div
-            className="community-compact-row"
+            className="community-row"
+            role="listitem"
             onClick={() => setIsLocationModalOpen(true)}
           >
-            <div className="community-badge-dot bg-purple">NR</div>
-            <div className="community-compact-info">
-              <span className="community-compact-name">Nearby Residents</span>
-              <span className="community-compact-meta">36 members · Civic Watch</span>
+            <div className="community-avatar-tile avatar-green" aria-hidden="true">
+              CC
+            </div>
+            <div className="community-meta-col">
+              <span className="community-name">Your College Community</span>
+              <span className="community-subtext">154 members · Campus Zone</span>
+            </div>
+          </div>
+
+          {/* Row 4: Nearby Residents */}
+          <div
+            className="community-row"
+            role="listitem"
+            onClick={() => setIsLocationModalOpen(true)}
+          >
+            <div className="community-avatar-tile avatar-purple" aria-hidden="true">
+              NR
+            </div>
+            <div className="community-meta-col">
+              <span className="community-name">Nearby Residents</span>
+              <span className="community-subtext">36 members · Civic Watch</span>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ====================================================================
-          C. NEARBY INCIDENTS (Section 9.C)
-          ==================================================================== */}
-      <div className="right-sidebar-card">
-        <div className="right-card-header-bar">
-          <span className="right-card-heading">NEARBY INCIDENTS</span>
-          <span className="nearby-radius-tag">{selectedRadiusKm} km</span>
+      {/* 3. NEARBY INCIDENTS Card */}
+      <section className="right-sidebar-card" aria-label="Nearby Incidents">
+        <div className="right-card-header">
+          <h2 className="right-card-heading">NEARBY INCIDENTS</h2>
+          <span className="nearby-radius-pill">{selectedRadiusKm} km</span>
         </div>
 
         {nearbyUnresolved.length === 0 ? (
-          <div className="nearby-empty-note">
-            No unresolved incidents reported within {selectedRadiusKm} km.
-          </div>
+          <p className="nearby-empty-text">
+            No unresolved incidents within {selectedRadiusKm} km. Nice work, neighbours.
+          </p>
         ) : (
-          <div className="nearby-compact-list">
+          <div className="nearby-incident-list" role="list">
             {nearbyUnresolved.slice(0, 4).map((inc) => (
               <div
                 key={inc.id}
-                className="nearby-compact-row"
+                className="nearby-incident-row"
+                role="listitem"
                 onClick={() => {
                   setCurrentIncidentId(inc.id);
                   setActiveView('incident_detail');
                 }}
-                title={inc.title}
               >
-                <div className="nearby-row-left">
-                  <span className="nearby-issue-title">{inc.title}</span>
-                  <span className="nearby-issue-sub">
+                <div className="nearby-incident-info">
+                  <span className="nearby-incident-title">{inc.title}</span>
+                  <span className="nearby-incident-sub">
                     {inc.category} · {inc.counts.witnesses} saw it
                   </span>
                 </div>
-                <div className="nearby-row-right">
-                  <span className="nearby-distance-tag">
+                <div className="nearby-incident-meta">
+                  <span className="nearby-distance-badge">
                     {inc.distanceKm !== undefined ? formatDistance(inc.distanceKm) : 'Nearby'}
                   </span>
-                  <span className={`nearby-status-badge ${inc.status}`}>
-                    {inc.status === 'room_active' ? 'Room Open' : 'Unresolved'}
-                  </span>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
-
-      {/* ====================================================================
-          D. COMMUNITY ACTIVITY (Section 9.D)
-          ==================================================================== */}
-      <div className="right-sidebar-card civic-activity-module">
-        <div className="right-card-header-bar">
-          <span className="right-card-heading">COMMUNITY ACTIVITY</span>
-          <Activity size={14} color="#FF4D1A" />
-        </div>
-
-        <div className="activity-stat-rows">
-          <div className="activity-stat-item">
-            <span className="activity-stat-bullet orange">●</span>
-            <span className="activity-stat-text">
-              <strong>New photo evidence</strong> added to streetlight report
-            </span>
-          </div>
-
-          <div className="activity-stat-item">
-            <span className="activity-stat-bullet purple">●</span>
-            <span className="activity-stat-text">
-              <strong>Incident Room opened</strong> with 50 unique contributors
-            </span>
-          </div>
-
-          <div className="activity-stat-item">
-            <span className="activity-stat-bullet blue">●</span>
-            <span className="activity-stat-text">
-              <strong>Signature campaign</strong> started for road reconstruction
-            </span>
-          </div>
-
-          <div className="activity-stat-item">
-            <span className="activity-stat-bullet green">●</span>
-            <span className="activity-stat-text">
-              <strong>Leader approval</strong> granted for municipal submission
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ====================================================================
-          E. URGENT SAFETY NOTICES (Section 9.E)
-          ==================================================================== */}
-      {urgentHazards.length > 0 && (
-        <div className="right-sidebar-card urgent-safety-card">
-          <div className="urgent-card-header">
-            <ShieldAlert size={16} className="urgent-shield-icon" />
-            <span className="urgent-card-title">URGENT SAFETY NOTICE</span>
-          </div>
-          <div className="urgent-card-body">
-            <p className="urgent-issue-name">{urgentHazards[0].title}</p>
-            <p className="urgent-warning-text">
-              ⚠️ Public electrical hazard reported near {urgentHazards[0].landmark}. Maintain at least 10m safe distance. Escalated to utility emergency team.
-            </p>
-            <button
-              type="button"
-              className="urgent-view-btn"
-              onClick={() => {
-                setCurrentIncidentId(urgentHazards[0].id);
-                setActiveView('incident_detail');
-              }}
-            >
-              View Hazard & Safety Guidelines →
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ====================================================================
-          F. RECENTLY RESOLVED (Section 9.F)
-          ==================================================================== */}
-      <div className="right-sidebar-card">
-        <div className="right-card-header-bar">
-          <span className="right-card-heading">RECENTLY RESOLVED</span>
-          <CheckCircle2 size={14} color="#10b981" />
-        </div>
-
-        {resolvedIncidents.length === 0 ? (
-          <div className="nearby-empty-note">
-            No resolved issues recorded in this view yet.
-          </div>
-        ) : (
-          <div className="resolved-compact-list">
-            {resolvedIncidents.slice(0, 3).map((res) => (
-              <div
-                key={res.id}
-                className="resolved-compact-row"
-                onClick={() => {
-                  setCurrentIncidentId(res.id);
-                  setActiveView('incident_detail');
-                }}
-              >
-                <div className="resolved-check-icon">
-                  <Check size={12} />
-                </div>
-                <div className="resolved-row-info">
-                  <span className="resolved-title">{res.title}</span>
-                  <span className="resolved-meta">
-                    Community-verified · {res.counts.witnesses} verified fix
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      </section>
     </aside>
   );
 };

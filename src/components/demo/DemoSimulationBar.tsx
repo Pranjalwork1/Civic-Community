@@ -40,9 +40,18 @@ export const DemoSimulationBar: React.FC = () => {
   const targetComplaintKey = targetCampaign ? `doc-${targetRoom.id}-v${targetCampaign.complaintVersion}` : null;
   const targetComplaint = targetComplaintKey ? complaintDocs[targetComplaintKey] : null;
 
+  // Remove Dev Tools floating overlay from production builds; keep behind dev-only flag
+  const isDev =
+    Boolean((import.meta as any).env?.DEV) &&
+    (typeof window !== 'undefined' && window.location.search.includes('dev=true'));
+
+  if (!isDev) {
+    return null;
+  }
+
   return (
     <>
-      {/* Collapsible Floating Trigger Button (Section 16: Never obscuring UI) */}
+      {/* Collapsible Floating Trigger Button */}
       <button
         className="dev-tools-fab-button"
         onClick={() => setIsOpen(!isOpen)}

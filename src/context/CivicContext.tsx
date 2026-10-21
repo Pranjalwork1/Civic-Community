@@ -157,7 +157,16 @@ export const CivicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [wizardStep, setWizardStep] = useState<1 | 2 | 3 | 4>(1);
   const [reportDraft, setReportDraft] = useState<ReportDraft>(emptyDraft);
   const [selectedLocation, setSelectedLocationState] = useState<UserSelectedLocation | null>(() =>
-    locationService.getStoredLocation()
+    locationService.getStoredLocation() || {
+      name: 'Knowledge Park III, Greater Noida',
+      locality: 'Knowledge Park III',
+      city: 'Greater Noida',
+      state: 'Uttar Pradesh',
+      lat: 28.4619,
+      lng: 77.4988,
+      accuracy: '±15m',
+      source: 'sample',
+    }
   );
   const [selectedRadiusKm, setSelectedRadiusKm] = useState<number>(5);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);

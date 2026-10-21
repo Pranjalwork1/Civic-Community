@@ -168,6 +168,46 @@ export const storageService = {
         targetId: 'inc-1051',
         type: 'gesture',
       },
+      {
+        id: 'notif-3',
+        title: 'Municipal response acknowledged',
+        body: 'Ward engineer acknowledged the drainage overflow ticket.',
+        timestamp: '3 hours ago',
+        isRead: false,
+        linkTab: 'tracking',
+        targetId: 'doc-room-1042-v1',
+        type: 'status',
+      },
+      {
+        id: 'notif-4',
+        title: 'Petition threshold reached',
+        body: '85 verified residents signed the street lighting petition.',
+        timestamp: '5 hours ago',
+        isRead: false,
+        linkTab: 'tracking',
+        targetId: 'room-1042',
+        type: 'campaign',
+      },
+      {
+        id: 'notif-5',
+        title: 'Safety advisory for heavy rain',
+        body: 'Low-lying water logging advisory issued for local transit points.',
+        timestamp: 'Yesterday',
+        isRead: false,
+        linkTab: 'explore',
+        targetId: 'inc-1053',
+        type: 'status',
+      },
+      {
+        id: 'notif-6',
+        title: 'Community corridor verification complete',
+        body: 'CivicSignal automated cluster check confirmed 17 related observations.',
+        timestamp: '2 days ago',
+        isRead: false,
+        linkTab: 'explore',
+        targetId: 'inc-1042',
+        type: 'status',
+      },
     ];
   },
 
@@ -182,7 +222,7 @@ export const storageService = {
       const stored = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
       if (stored) return JSON.parse(stored);
     } catch (e) {}
-    return DEMO_USERS[0]; // Ananya Sharma
+    return DEMO_USERS.find((u) => u.id === 'user-ravi') || DEMO_USERS[1] || DEMO_USERS[0];
   },
 
   saveCurrentUser(user: UserProfile): void {
