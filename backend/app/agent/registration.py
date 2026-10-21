@@ -63,14 +63,14 @@ def register_coordinator_agent(
     - Reuses the existing agent seed to maintain permanent agent identity.
     - Uses the designated /submit endpoint on Render.
     """
-    agent_name = (name or settings.AGENT_NAME).strip()
+    agent_name = (name if name is not None else settings.AGENT_NAME).strip()
     target_endpoint = (
         endpoint
-        or settings.AGENT_ENDPOINT_URL
-        or "https://civicsignal-backend.onrender.com/submit"
+        if endpoint is not None
+        else (settings.AGENT_ENDPOINT_URL or "https://civicsignal-backend.onrender.com/submit")
     ).strip()
-    seed = (agent_seed or settings.AGENT_SEED).strip()
-    api_key = (agentverse_key or settings.AGENTVERSE_KEY).strip()
+    seed = (agent_seed if agent_seed is not None else settings.AGENT_SEED).strip()
+    api_key = (agentverse_key if agentverse_key is not None else settings.AGENTVERSE_KEY).strip()
 
     if not api_key:
         msg = (
