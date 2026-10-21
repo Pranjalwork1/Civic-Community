@@ -41,12 +41,13 @@ class Settings:
     
     # Public Endpoint URL for Agentverse Connect Agent wizard
     # e.g., https://civicsignal-backend.onrender.com/submit
-    AGENT_ENDPOINT_URL: str = os.getenv("AGENT_ENDPOINT_URL", "").strip()
+    AGENT_ENDPOINT_URL: str = os.getenv("AGENT_ENDPOINT_URL", "https://civicsignal-backend.onrender.com/submit").strip()
 
     # Mailbox connectivity (alternative to direct public endpoint)
     AGENT_MAILBOX: bool = os.getenv("AGENT_MAILBOX", "false").lower() in ("true", "1", "yes")
-    AGENTVERSE_KEY: str = os.getenv("AGENTVERSE_KEY", "")
-    AGENTVERSE_URL: str = os.getenv("AGENTVERSE_URL", "https://agentverse.ai")
+    AGENTVERSE_KEY: str = os.getenv("AGENTVERSE_KEY", "").strip()
+    AGENTVERSE_URL: str = os.getenv("AGENTVERSE_URL", "https://agentverse.ai").strip()
+    AUTO_REGISTER_AGENTVERSE: bool = os.getenv("AUTO_REGISTER_AGENTVERSE", "false").lower() in ("true", "1", "yes")
 
     # ASI:One API Integration (server-side only)
     ASI_ONE_API_KEY: str = os.getenv("ASI_ONE_API_KEY", "")

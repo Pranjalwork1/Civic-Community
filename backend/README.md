@@ -57,15 +57,57 @@ Click **Save Changes** and deploy. Once deployment completes, your public URL wi
 
 ---
 
-## 🤖 Connecting the Agent on Agentverse
+## 🤖 Registering the Agent on Agentverse
 
-Now that your agent is live on Render:
+You can register the agent in Agentverse via **Option A (Programmatic API Registration - Recommended)** or **Option B (Agentverse UI Wizard)**.
 
+### Option A: Programmatic Registration via `register_chat_agent` (Recommended)
+
+This project integrates the official `register_chat_agent` and `RegistrationRequestCredentials` from `uagents_core.utils.registration`.
+
+1. **Obtain your Agentverse API Key:**
+   - Log into [https://agentverse.ai](https://agentverse.ai)
+   - Go to **Profile** → **API Keys**
+   - Click **+ New API Key**, name it `civicsignal-key`, and copy the key.
+2. **Set the Key in Environment:**
+   - Add `AGENTVERSE_KEY=<your-agentverse-api-key>` in `backend/.env` (locally) or in the Render Dashboard under **Environment**.
+3. **Run the CLI Registration Tool:**
+   ```bash
+   python backend/register_agent.py
+   ```
+   *To customize the endpoint:*
+   ```bash
+   python backend/register_agent.py --endpoint https://civicsignal-backend.onrender.com/submit
+   ```
+4. **How It Works Under the Hood:**
+   - Signs an identity challenge using your stable cryptographic seed (`settings.AGENT_SEED`).
+   - Authenticates to Agentverse using `RegistrationRequestCredentials`.
+   - Calls `register_chat_agent(name="civicsignal_coordinator", endpoint="https://civicsignal-backend.onrender.com/submit", active=True, ...)`.
+   - Sets the agent status to **Active** and registers the `AgentChatProtocol:0.3.0` digest.
+   - Publishes starter prompts, category tags (`civic`, `community`, `governance`), and markdown documentation.
+
+#### Automated Startup Registration (Zero-Touch):
+Set `AUTO_REGISTER_AGENTVERSE=true` in Render environment variables. The backend will automatically execute `register_chat_agent` during server startup in a non-blocking background task.
+
+#### Authenticated API Endpoint:
+You can also trigger registration via an authenticated HTTP request:
+```bash
+curl -X POST https://civicsignal-backend.onrender.com/api/agent/register \
+  -H "Authorization: Bearer <YOUR_BACKEND_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{"active": true}'
+```
+
+---
+
+### Option B: Manual UI Wizard Registration
+
+If you prefer connecting via the Agentverse web console:
 1. In Agentverse, navigate to **Launch an Agent** → **Connect Agent**.
 2. Select **Chat Protocol**.
 3. On the **Add your agent details** screen:
    - **Agent Name:** `civicsignal_coordinator`
-   - **Agent Endpoint URL:** `https://<your-render-service-name>.onrender.com/submit`
+   - **Agent Endpoint URL:** `https://civicsignal-backend.onrender.com/submit`
 4. Click **Next / Verify**.
    - Agentverse sends a `HEAD /submit` request to verify the server is live and returns `200 OK`.
    - Agentverse retrieves the agent's published `AgentChatProtocol:0.3.0` manifest.

@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 import logging
 from typing import Optional
@@ -8,6 +9,7 @@ from pydantic import BaseModel, Field
 from backend.app.config import settings
 from backend.app.auth import verify_api_key
 from backend.app.services.agent_service import coordinator_service
+from backend.app.agent.registration import register_coordinator_agent
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,6 +38,20 @@ async def lifespan(app: FastAPI):
     logger.info(f"Agent Endpoint URL: {settings.AGENT_ENDPOINT_URL or 'Internal (auto-mounted at /submit)'}")
     logger.info(f"Agent Mailbox: {'Enabled (Agentverse)' if settings.AGENT_MAILBOX and not settings.AGENT_ENDPOINT_URL else 'Disabled'}")
     logger.info(f"ASI:One API: {'Configured' if settings.ASI_ONE_API_KEY else 'Domain Fallback Active'}")
+
+    # Optional automated startup registration with Agentverse
+    if settings.AUTO_REGISTER_AGENTVERSE:
+        if settings.AGENTVERSE_KEY:
+            logger.info("AUTO_REGISTER_AGENTVERSE enabled: attempting background registration with Agentverse...")
+            asyncio.create_task(asyncio.to_thread(register_coordinator_agent))
+        else:
+            logger.warning("AUTO_REGISTER_AGENTVERSE is enabled but AGENTVERSE_KEY is not set.")
+    else:
+        logger.info(
+            "Agentverse registration: On-demand mode. "
+            "Run 'python backend/register_agent.py' or call POST /api/agent/register to register."
+        )
+
     yield
     logger.info("CivicSignal Backend shutting down.")
 
@@ -114,6 +130,48 @@ async def get_agent_info():
         asi_one_connected=bool(settings.ASI_ONE_API_KEY),
         asi_one_model=settings.ASI_ONE_MODEL,
     )
+
+class AgentRegisterRequest(BaseModel):
+    endpoint: Optional[str] = Field(None, description="Public HTTPS endpoint URL (e.g. /submit)")
+    name: Optional[str] = Field(None, description="Agent name on Agentverse")
+    active: bool = Field(True, description="Mark agent active on Agentverse")
+
+class AgentRegisterResponse(BaseModel):
+    success: bool
+    agent_name: str
+    endpoint: str
+    active: bool
+    message: str
+    error: Optional[str] = None
+
+@app.post(
+    "/api/agent/register",
+    response_model=AgentRegisterResponse,
+    dependencies=[Depends(verify_api_key)],
+    summary="Register CivicSignal Coordinator Agent with Agentverse using register_chat_agent",
+)
+async def register_agent_on_agentverse(payload: Optional[AgentRegisterRequest] = None):
+    """
+    Triggers official register_chat_agent registration with Agentverse.
+    Protected with server-side authentication.
+    """
+    req_endpoint = payload.endpoint if payload else None
+    req_name = payload.name if payload else None
+    req_active = payload.active if payload else True
+
+    result = await asyncio.to_thread(
+        register_coordinator_agent,
+        endpoint=req_endpoint,
+        name=req_name,
+        active=req_active,
+    )
+
+    if not result["success"] and result.get("error") == "AGENTVERSE_KEY is not configured":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=result["message"],
+        )
+    return AgentRegisterResponse(**result)
 
 @app.post(
     "/api/assistant/chat",
