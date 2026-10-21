@@ -240,28 +240,22 @@ export const ExploreFeed: React.FC = () => {
           ==================================================================== */}
       <section className="feed-filter-row" aria-label="Filter Feed">
         {/* Left: Scrollable Categories */}
-        <div className="category-chips-wrapper">
-          <div className="category-chips-track" role="tablist" aria-label="Categories">
-            {standardCategoryChips.map((chip) => {
-              const isActive = activeCategoryFilter === chip.id;
-              return (
-                <button
-                  key={chip.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  className={`category-chip ${isActive ? 'active' : ''}`}
-                  onClick={() => setActiveCategoryFilter(chip.id)}
-                >
-                  {chip.label}
-                </button>
-              );
-            })}
-          </div>
-          {/* Subtle scroll indicator bar matching target.png */}
-          <div className="category-scroll-bar" aria-hidden="true">
-            <div className="category-scroll-thumb" />
-          </div>
+        <div className="category-chips-track" role="tablist" aria-label="Categories">
+          {standardCategoryChips.map((chip) => {
+            const isActive = activeCategoryFilter === chip.id;
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                className={`category-chip ${isActive ? 'active' : ''}`}
+                onClick={() => setActiveCategoryFilter(chip.id)}
+              >
+                {chip.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Right: Sort & Time Chips */}

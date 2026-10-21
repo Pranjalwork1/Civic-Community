@@ -74,7 +74,7 @@
 
 html, body {
   width: 100%;
-  max-width: 100vw;
+  max-width: 100%;
   overflow-x: hidden;
   background-color: var(--page-bg);
   color: var(--ink);
@@ -180,7 +180,8 @@ a {
 /* Center Search Pill */
 .navbar-search-section, .nav-center {
   flex: 1;
-  max-width: 360px;
+  min-width: 0;
+  max-width: 520px;
   display: flex;
   align-items: center;
 }
@@ -209,6 +210,7 @@ a {
   font-weight: 400;
   color: var(--ink);
   outline: none;
+  min-width: 0;
 }
 
 .navbar-search-input::placeholder, .search-input::placeholder {
@@ -220,6 +222,7 @@ a {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 /* Location Chip */
@@ -539,14 +542,16 @@ a {
    Primary 3-Column Layout: Left Nav (200px) | Main Feed | Right Col (340px)
    ========================================================================== */
 .main-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) 340px;
+  gap: 28px;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 28px 32px 60px;
-  display: grid;
-  grid-template-columns: 200px 1fr 340px;
-  gap: 28px;
+  padding: 24px 28px;
   align-items: start;
   box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
 }
 
 /* ==========================================================================
@@ -555,7 +560,11 @@ a {
 .left-nav-container, .left-icon-rail, .left-sidebar {
   width: 200px;
   position: sticky;
-  top: 100px;
+  top: 88px;
+  align-self: start;
+  margin: 0;
+  transform: none;
+  box-sizing: border-box;
 }
 
 .left-nav-list {
@@ -578,9 +587,11 @@ a {
   border: none;
   text-align: left;
   width: 100%;
+  box-sizing: border-box;
   transition: background-color var(--anim-fast), color var(--anim-fast);
   cursor: pointer;
   text-decoration: none;
+  position: relative;
 }
 
 .left-nav-item:hover {
@@ -609,17 +620,18 @@ a {
 
 .left-nav-badge {
   margin-left: auto;
-  background-color: var(--brand-orange);
+  position: static;
+  background-color: #D93A00;
   color: #FFFFFF;
   font-size: 11px;
   font-weight: 700;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  display: flex;
+  border-radius: 9999px;
+  padding: 2px 7px;
+  line-height: 1.2;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
+  flex-shrink: 0;
 }
 
 /* ==========================================================================
@@ -651,7 +663,7 @@ a {
 }
 
 .feed-greeting-subtitle {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ink-muted);
   margin: 0;
 }
@@ -774,29 +786,24 @@ a {
 }
 
 /* D. Filter Row */
+/* D. Filter Row */
 .feed-filter-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.category-chips-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
+  gap: 10px;
+  width: 100%;
 }
 
 .category-chips-track {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding-bottom: 2px;
+  padding-bottom: 0;
 }
 
 .category-chips-track::-webkit-scrollbar {
@@ -804,6 +811,7 @@ a {
 }
 
 .category-chip {
+  height: 44px;
   min-height: 44px;
   padding: 0 18px;
   border-radius: var(--radius-pill);
@@ -817,6 +825,9 @@ a {
   transition: all var(--anim-fast);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .category-chip:hover {
@@ -830,22 +841,6 @@ a {
   font-weight: 600;
 }
 
-.category-scroll-bar {
-  width: 100%;
-  height: 3px;
-  background: var(--surface-border);
-  border-radius: 2px;
-  position: relative;
-  margin-top: 2px;
-}
-
-.category-scroll-thumb {
-  width: 35%;
-  height: 100%;
-  background: var(--ink-light);
-  border-radius: 2px;
-}
-
 .feed-sort-chips-group {
   display: flex;
   align-items: center;
@@ -854,6 +849,7 @@ a {
 }
 
 .feed-option-chip {
+  height: 44px;
   min-height: 44px;
   padding: 0 18px;
   border-radius: var(--radius-pill);
@@ -865,6 +861,11 @@ a {
   white-space: nowrap;
   cursor: pointer;
   transition: all var(--anim-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .feed-option-chip:hover {
@@ -1135,14 +1136,19 @@ a {
    Right Column (340px)
    ========================================================================== */
 .right-sidebar-container, .right-sidebar {
-  width: 340px;
+  width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  box-sizing: border-box;
 }
 
 /* 1. AI Assistant Card */
 .ai-assistant-card, .sidebar-hero-assistant-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background: var(--brand-orange);
   border-radius: var(--card-radius);
   padding: 24px;
@@ -1414,34 +1420,29 @@ a {
 
 /* ==========================================================================
    Responsive Breakpoints
-   - Below 1100px: hide left nav, two columns (feed + 320px right column)
-   - Below 760px: single column, 16px padding, hide header search,
-                  category chips scroll horizontally, right column stacks
+   - >= 1100px: three columns (200px minmax(0, 1fr) 340px)
+   - 760 to 1099px: hide left nav, grid is minmax(0, 1fr) 320px
+   - < 760px: single column, 16px padding, right column stacks below the feed,
+     header search hidden
    ========================================================================== */
-@media (max-width: 1100px) {
+@media (min-width: 760px) and (max-width: 1099px) {
   .left-nav-container, .left-icon-rail, .left-sidebar {
     display: none !important;
   }
 
   .main-layout {
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: minmax(0, 1fr) 320px !important;
     gap: 24px;
-    padding: 24px 20px 48px;
+    padding: 24px 24px 48px;
   }
 
   .right-sidebar-container, .right-sidebar {
-    width: 320px;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 }
 
-@media (max-width: 760px) {
-  .main-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 16px 16px 48px;
-  }
-
+@media (max-width: 759px) {
   .left-nav-container, .left-icon-rail, .left-sidebar {
     display: none !important;
   }
@@ -1450,13 +1451,22 @@ a {
     display: none !important;
   }
 
+  .main-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px;
+    padding: 16px 16px 48px;
+    max-width: 100%;
+    margin: 0;
+  }
+
   .top-navbar-inner {
     padding: 0 16px;
     gap: 12px;
   }
 
   .navbar-location-chip, .community-selector {
-    display: none;
+    display: none !important;
   }
 
   .feed-stats-grid {
@@ -1492,11 +1502,8 @@ a {
     gap: 12px;
   }
 
-  .category-chips-wrapper {
-    width: 100%;
-  }
-
   .category-chips-track {
+    width: 100%;
     overflow-x: auto;
   }
 
@@ -1505,7 +1512,8 @@ a {
   }
 
   .right-sidebar-container, .right-sidebar {
-    width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 }
 
@@ -2853,1479 +2861,6 @@ a {
   border-color: var(--reddit-orange);
 }
 
-/* ==========================================================================
-   CivicSignal — Production 3-Column Community Workspace Design System
-   ========================================================================== */
-
-/* App Full-Width Viewport Container */
-.civic-app-container {
-  width: 100%;
-  max-width: 100vw;
-  min-height: 100vh;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  background: 
-    radial-gradient(at 0% 0%, rgba(255, 77, 26, 0.02) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.025) 0px, transparent 50%),
-    #f8fafc;
-}
-
-/* ==========================================================================
-   CivicSignal — Reddit-Inspired Desktop 3-Column Community Architecture
-   ========================================================================== */
-
-/* Main 3-Column Grid: Left Icon Rail (76px) + Central Feed (Flexible ~760-900px) + Right Sidebar (290px) */
-.main-layout {
-  display: grid;
-  grid-template-columns: 76px minmax(0, 1fr) 290px;
-  gap: 24px;
-  width: 100%;
-  max-width: 1380px;
-  margin: 0 auto;
-  padding: 20px 24px 80px;
-  align-items: flex-start;
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-/* Center Feed Container */
-.center-content {
-  min-width: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* ==========================================================================
-   4. LEFT ICON NAVIGATION RAIL (Compact ~76px Width)
-   ========================================================================== */
-.left-icon-rail {
-  width: 76px;
-  position: sticky;
-  top: 84px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  z-index: 30;
-  user-select: none;
-}
-
-.rail-menu-btn {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  color: #475569;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  transition: all 0.15s ease;
-  margin-bottom: 2px;
-}
-
-.rail-menu-btn:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #cbd5e1;
-}
-
-.rail-icons-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 10px 0;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
-}
-
-.rail-icon-btn {
-  position: relative;
-  width: 46px;
-  height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  color: #64748b;
-  background: transparent;
-  border: 1px solid transparent;
-  transition: all 0.15s ease;
-}
-
-.rail-icon-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-.rail-icon-btn.active {
-  background: rgba(255, 69, 0, 0.08);
-  color: #ff4500;
-  border-color: rgba(255, 69, 0, 0.25);
-}
-
-.rail-icon-btn.active svg {
-  color: #ff4500;
-  stroke-width: 2.3;
-}
-
-/* Hover Tooltip */
-.rail-tooltip {
-  position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%) translateX(-4px);
-  background: #0f172a;
-  color: #ffffff;
-  font-size: 11.5px;
-  font-weight: 600;
-  white-space: nowrap;
-  padding: 5px 10px;
-  border-radius: 6px;
-  pointer-events: none;
-  opacity: 0;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
-  z-index: 100;
-}
-
-.rail-tooltip::before {
-  content: '';
-  position: absolute;
-  right: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border-width: 5px;
-  border-style: solid;
-  border-color: transparent #0f172a transparent transparent;
-}
-
-.rail-icon-btn:hover .rail-tooltip {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
-}
-
-.rail-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  min-width: 17px;
-  height: 17px;
-  padding: 0 4px;
-  border-radius: 9px;
-  background: #ff4500;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 3px rgba(255, 69, 0, 0.3);
-}
-
-.rail-badge.alert {
-  background: #ef4444;
-}
-
-.rail-divider {
-  width: 34px;
-  height: 1px;
-  background: #e2e8f0;
-  margin: 4px 0;
-}
-
-/* ==========================================================================
-   Section 5: Reddit-Inspired Location and Feed Filter Bar
-   ========================================================================== */
-.reddit-filter-bar {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-/* Location Selector Pill (matches India dropdown in screenshot) */
-.filter-location-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1e293b;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.filter-location-pill:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.location-flag-badge {
-  font-size: 14px;
-}
-
-.location-name-label {
-  max-width: 170px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.location-chevron {
-  color: #64748b;
-}
-
-/* Ranking Tabs (All, Nearby, Unresolved, Rising, Needs Attention, Resolved, Communities) */
-.filter-tabs-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding: 2px 0;
-  flex: 1;
-  min-width: 0;
-}
-
-.filter-tabs-row::-webkit-scrollbar {
-  display: none;
-}
-
-.filter-tab-btn {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  background: transparent;
-  border: 1px solid transparent;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.filter-tab-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-/* Vibrant Orange Active Pill matching 'Rising' in Reddit reference screenshot */
-.filter-tab-btn.active {
-  background: #ff4500;
-  color: #ffffff;
-  border-color: #ff4500;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(255, 69, 0, 0.25);
-}
-
-/* Right Filter Dropdowns Group (Sorting & Time Filter) */
-.filter-dropdowns-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.filter-select-dropdown {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #334155;
-  outline: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.filter-select-dropdown:hover,
-.filter-select-dropdown:focus {
-  background: #ffffff;
-  border-color: #cbd5e1;
-}
-
-/* ==========================================================================
-   Section 8: Horizontal Category Chips Row (Scrollable, No Page Overflow)
-   ========================================================================== */
-.categories-scroll-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding: 2px 0;
-  margin-bottom: 12px;
-}
-
-.categories-scroll-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
-.categories-scroll-track {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-
-.category-filter-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12.5px;
-  font-weight: 600;
-  background: #ffffff;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-  cursor: pointer;
-  user-select: none;
-}
-
-.category-filter-pill:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #cbd5e1;
-}
-
-.category-filter-pill.active {
-  background: #0f172a;
-  color: #ffffff;
-  border-color: #0f172a;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
-}
-
-.cat-pill-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ==========================================================================
-   Report Composer Quick Box
-   ========================================================================== */
-.reddit-composer-box {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-  cursor: pointer;
-  transition: border-color 0.15s ease;
-}
-
-.reddit-composer-box:hover {
-  border-color: #cbd5e1;
-}
-
-.composer-avatar-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #0f172a;
-  color: #ffffff;
-  font-size: 12.5px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.composer-input-placeholder {
-  flex: 1;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 13.5px;
-  color: #64748b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.composer-quick-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.composer-quick-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #475569;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.composer-quick-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-.composer-create-action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 14px;
-  border-radius: 18px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #ffffff;
-  background: #ff4500;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(255, 69, 0, 0.25);
-  transition: all 0.15s ease;
-}
-
-.composer-create-action-btn:hover {
-  background: #e03d00;
-}
-
-/* ==========================================================================
-   Section 6: Clean White Reddit-Style Incident Feed Cards
-   ========================================================================== */
-.reddit-incident-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 14px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.reddit-incident-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
-}
-
-/* A. Report Header */
-.card-header-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.card-header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-}
-
-.card-author-avatar {
-  font-size: 24px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.card-meta-line {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #64748b;
-  flex-wrap: wrap;
-}
-
-.card-posted-by {
-  color: #94a3b8;
-}
-
-.card-author-name {
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.card-meta-sep {
-  color: #cbd5e1;
-}
-
-.card-timestamp {
-  color: #64748b;
-}
-
-.card-locality-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-weight: 600;
-  color: #334155;
-}
-
-.inline-pin-icon {
-  color: #ff4500;
-}
-
-.card-ref-badge {
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  background: #f1f5f9;
-  color: #475569;
-  padding: 1px 6px;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-}
-
-.card-header-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.card-hazard-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: #fef2f2;
-  color: #ef4444;
-  border: 1px solid #fecaca;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 12px;
-}
-
-.card-category-pill {
-  font-size: 11px;
-  font-weight: 700;
-  background: #f8fafc;
-  color: #334155;
-  border: 1px solid #e2e8f0;
-  padding: 3px 8px;
-  border-radius: 12px;
-  white-space: nowrap;
-}
-
-.card-overflow-btn {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  padding: 4px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.card-overflow-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-/* B. Incident Heading */
-.card-incident-heading {
-  font-size: 17px;
-  font-weight: 750;
-  color: #0f172a;
-  line-height: 1.35;
-  margin: 0;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.card-incident-heading:hover {
-  color: #ff4500;
-}
-
-/* C. Description Preview */
-.card-incident-description {
-  font-size: 13.5px;
-  color: #334155;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* D. Evidence Photograph with Geotag Context */
-.card-evidence-frame {
-  position: relative;
-  border-radius: 10px;
-  overflow: hidden;
-  max-height: 380px;
-  background: #0f172a;
-  cursor: pointer;
-}
-
-.card-evidence-image {
-  width: 100%;
-  max-height: 380px;
-  object-fit: cover;
-  display: block;
-}
-
-.card-geotag-banner {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.85) 100%);
-  padding: 16px 14px 10px;
-  color: #ffffff;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  font-size: 11px;
-}
-
-.geotag-banner-left {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.geotag-pin {
-  color: #ff4500;
-}
-
-.geotag-verified-badge {
-  background: rgba(16, 185, 129, 0.25);
-  border: 1px solid rgba(16, 185, 129, 0.5);
-  color: #34d399;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 10px;
-}
-
-/* E. Location & Landmark Info */
-.card-location-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #64748b;
-  background: #f8fafc;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid #f1f5f9;
-}
-
-.landmark-pin {
-  color: #ff4500;
-  flex-shrink: 0;
-}
-
-.landmark-title {
-  font-weight: 600;
-  color: #334155;
-}
-
-.landmark-distance-pill {
-  color: #0284c7;
-  font-weight: 600;
-}
-
-/* AI Incident Cluster Detection Intelligence Indicator */
-.card-ai-cluster-banner {
-  background: rgba(2, 132, 199, 0.05);
-  border: 1px solid rgba(2, 132, 199, 0.2);
-  border-radius: 10px;
-  padding: 10px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.ai-cluster-left {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ai-cluster-heading {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #0284c7;
-}
-
-.ai-cluster-factors {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  color: #475569;
-}
-
-.ai-cluster-view-btn {
-  background: #ffffff;
-  border: 1px solid rgba(2, 132, 199, 0.35);
-  color: #0284c7;
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-
-.ai-cluster-view-btn:hover {
-  background: #0284c7;
-  color: #ffffff;
-}
-
-/* Community Status & Contributor Progress Toward 50-Person Room */
-.card-community-progress-box {
-  background: rgba(124, 58, 237, 0.04);
-  border: 1px solid rgba(124, 58, 237, 0.18);
-  border-radius: 10px;
-  padding: 10px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.progress-box-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: #7c3aed;
-}
-
-.progress-status-chip {
-  background: rgba(124, 58, 237, 0.12);
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-}
-
-.progress-track-bar {
-  width: 100%;
-  height: 6px;
-  background: rgba(124, 58, 237, 0.12);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress-fill-bar {
-  height: 100%;
-  background: #7c3aed;
-  border-radius: 3px;
-  transition: width 0.3s ease;
-}
-
-.progress-fill-bar.active-room {
-  background: linear-gradient(90deg, #7c3aed, #10b981);
-}
-
-/* F. Civic Activity Summary Counters */
-.card-civic-vitals-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #64748b;
-  flex-wrap: wrap;
-  padding: 2px 0;
-}
-
-.vital-stat {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.vital-stat strong {
-  color: #0f172a;
-}
-
-.vital-stat-sep {
-  color: #cbd5e1;
-}
-
-/* G. Action Row: Civic Gestures (Section 7) */
-.card-action-gestures-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 12px;
-  flex-wrap: wrap;
-}
-
-/* Mutually Exclusive "I Saw It" vs "I Didn't See It" */
-.observation-pair-control {
-  display: inline-flex;
-  align-items: center;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 2px;
-  gap: 2px;
-}
-
-.obs-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 14px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.obs-toggle-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-.obs-toggle-btn.obs-saw-it.selected {
-  background: #0f172a;
-  color: #ffffff;
-}
-
-.obs-toggle-btn.obs-saw-it.selected .obs-counter-pill {
-  background: #ff4500;
-  color: #ffffff;
-}
-
-.obs-toggle-btn.obs-did-not-see.selected {
-  background: #475569;
-  color: #ffffff;
-}
-
-.obs-counter-pill {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 0 5px;
-  border-radius: 8px;
-  background: #e2e8f0;
-  color: #475569;
-}
-
-/* Secondary Civic Actions */
-.secondary-gestures-stack {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.gesture-action-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 15px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #64748b;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.gesture-action-pill:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: #cbd5e1;
-}
-
-.gesture-action-pill.active {
-  background: rgba(2, 132, 199, 0.08);
-  color: #0284c7;
-  border-color: rgba(2, 132, 199, 0.3);
-}
-
-.gesture-sub-count {
-  font-size: 10px;
-  background: rgba(2, 132, 199, 0.15);
-  color: #0284c7;
-  padding: 1px 5px;
-  border-radius: 8px;
-  font-weight: 700;
-}
-
-/* ==========================================================================
-   Section 10: Compact Empty State
-   ========================================================================== */
-.compact-empty-state {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 32px 24px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-}
-
-.empty-state-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 69, 0, 0.08);
-  color: #ff4500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.empty-state-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.empty-state-sub {
-  font-size: 13px;
-  color: #64748b;
-  max-width: 400px;
-  line-height: 1.45;
-}
-
-.empty-state-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.btn-empty-report {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #ff4500;
-  color: #ffffff;
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 8px 16px;
-  border-radius: 18px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(255, 69, 0, 0.25);
-}
-
-.btn-empty-report:hover {
-  background: #e03d00;
-}
-
-.btn-empty-radar {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #475569;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 8px 16px;
-  border-radius: 18px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.btn-empty-radar:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-/* ==========================================================================
-   Section 9: Contextual Right Sidebar Modules (270-300px)
-   ========================================================================== */
-.right-sidebar {
-  width: 290px;
-  position: sticky;
-  top: 80px;
-  max-height: calc(100vh - 90px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding-right: 2px;
-}
-
-.right-sidebar::-webkit-scrollbar {
-  width: 4px;
-}
-.right-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 225, 0.5);
-  border-radius: 4px;
-}
-
-/* Module A: Hero Assistant Card (matches Reddit Premium in ref) */
-.sidebar-hero-assistant-card {
-  background: linear-gradient(135deg, #ff4500 0%, #ff5722 100%);
-  border-radius: 12px;
-  padding: 16px 18px;
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 4px 14px rgba(255, 69, 0, 0.25);
-}
-
-.hero-assistant-icon-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.hero-assistant-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-assistant-badge {
-  font-size: 10px;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.25);
-  padding: 2px 8px;
-  border-radius: 10px;
-  letter-spacing: 0.05em;
-}
-
-.hero-assistant-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0;
-}
-
-.hero-assistant-desc {
-  font-size: 12px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.92);
-  margin: 0;
-}
-
-.hero-assistant-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: #ffffff;
-  color: #ff4500;
-  font-size: 12.5px;
-  font-weight: 750;
-  padding: 7px 14px;
-  border-radius: 18px;
-  border: none;
-  cursor: pointer;
-  margin-top: 4px;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.hero-assistant-action-btn:hover {
-  background: #f8fafc;
-  transform: translateY(-1px);
-}
-
-.hero-btn-arrow {
-  transition: transform 0.15s ease;
-}
-
-.hero-assistant-action-btn:hover .hero-btn-arrow {
-  transform: translateX(3px);
-}
-
-.hero-assistant-subtext {
-  font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.8);
-  font-style: italic;
-}
-
-/* General Sidebar Cards (White Cards) */
-.right-sidebar-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 14px 16px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.right-card-header-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.right-card-heading {
-  font-size: 11.5px;
-  font-weight: 800;
-  color: #1e293b;
-  letter-spacing: 0.04em;
-}
-
-.right-card-action-link {
-  font-size: 11px;
-  font-weight: 700;
-  color: #ff4500;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.right-card-action-link:hover {
-  text-decoration: underline;
-}
-
-.nearby-radius-tag {
-  font-size: 10.5px;
-  font-weight: 700;
-  background: #f1f5f9;
-  color: #475569;
-  padding: 2px 6px;
-  border-radius: 8px;
-}
-
-/* Module B: Communities Compact List */
-.communities-compact-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.community-compact-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.community-compact-row:hover {
-  background: #f8fafc;
-}
-
-.community-compact-row.active {
-  background: rgba(255, 69, 0, 0.05);
-}
-
-.community-badge-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10.5px;
-  font-weight: 800;
-  color: #ffffff;
-  flex-shrink: 0;
-}
-
-.bg-orange { background: #ff4500; }
-.bg-blue { background: #0284c7; }
-.bg-green { background: #10b981; }
-.bg-purple { background: #8b5cf6; }
-
-.community-compact-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
-}
-
-.community-compact-name {
-  font-size: 12.5px;
-  font-weight: 650;
-  color: #0f172a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.community-compact-meta {
-  font-size: 10.5px;
-  color: #64748b;
-}
-
-.community-status-live {
-  font-size: 10px;
-  font-weight: 700;
-  color: #10b981;
-}
-
-/* Module C: Nearby Incidents Compact List */
-.nearby-compact-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.nearby-compact-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.nearby-compact-row:hover {
-  background: #f8fafc;
-}
-
-.nearby-row-left {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
-}
-
-.nearby-issue-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #0f172a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.nearby-issue-sub {
-  font-size: 10.5px;
-  color: #64748b;
-}
-
-.nearby-row-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-.nearby-distance-tag {
-  font-size: 10px;
-  font-weight: 700;
-  color: #0284c7;
-}
-
-.nearby-status-badge {
-  font-size: 9.5px;
-  font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 6px;
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.nearby-status-badge.room_active {
-  background: rgba(124, 58, 237, 0.12);
-  color: #7c3aed;
-}
-
-/* Module D: Community Activity */
-.activity-stat-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.activity-stat-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 11.5px;
-  color: #475569;
-  line-height: 1.35;
-}
-
-.activity-stat-bullet {
-  font-size: 11px;
-  line-height: 1.3;
-}
-.activity-stat-bullet.orange { color: #ff4500; }
-.activity-stat-bullet.purple { color: #8b5cf6; }
-.activity-stat-bullet.blue { color: #0284c7; }
-.activity-stat-bullet.green { color: #10b981; }
-
-/* Module E: Urgent Safety Notice */
-.urgent-safety-card {
-  background: #fffbeb;
-  border-color: #fde68a;
-}
-
-.urgent-card-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.urgent-shield-icon {
-  color: #d97706;
-}
-
-.urgent-card-title {
-  font-size: 11px;
-  font-weight: 800;
-  color: #b45309;
-  letter-spacing: 0.05em;
-}
-
-.urgent-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.urgent-issue-name {
-  font-size: 12.5px;
-  font-weight: 750;
-  color: #78350f;
-  margin: 0;
-}
-
-.urgent-warning-text {
-  font-size: 11.5px;
-  color: #92400e;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.urgent-view-btn {
-  background: #fef3c7;
-  border: 1px solid #fcd34d;
-  color: #b45309;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 4px;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-
-.urgent-view-btn:hover {
-  background: #fde68a;
-}
-
-/* Module F: Recently Resolved */
-.resolved-compact-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.resolved-compact-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.resolved-compact-row:hover {
-  background: #f8fafc;
-}
-
-.resolved-check-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.resolved-row-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.resolved-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #0f172a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.resolved-meta {
-  font-size: 10px;
-  color: #059669;
-  font-weight: 500;
-}
-
 /* Wizard Sidebar meta styles */
 .wizard-right-meta-row {
   display: flex;
@@ -4546,66 +3081,3 @@ a {
 .dev-reset-btn:hover {
   background: #fee2e2;
 }
-
-/* ==========================================================================
-   Section 2 & 16: Responsive 3-Region Desktop & Mobile Layout Architecture
-   ========================================================================== */
-@media (max-width: 1140px) {
-  .main-layout {
-    grid-template-columns: 76px minmax(0, 1fr) !important;
-    gap: 16px;
-    padding: 14px 16px 80px;
-  }
-  .right-sidebar {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-layout {
-    grid-template-columns: 1fr !important;
-    gap: 12px;
-    padding: 10px 12px 80px;
-  }
-  .left-icon-rail {
-    display: none !important;
-  }
-  .right-sidebar {
-    display: none !important;
-  }
-  .reddit-filter-bar {
-    padding: 8px 10px;
-  }
-  .filter-tabs-row {
-    width: 100%;
-  }
-  .filter-dropdowns-group {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .reddit-composer-box {
-    padding: 8px 12px;
-  }
-  .card-action-gestures-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .observation-pair-control {
-    width: 100%;
-    justify-content: center;
-  }
-  .secondary-gestures-stack {
-    justify-content: space-between;
-  }
-  .dev-tools-fab-button {
-    bottom: 74px;
-    right: 14px;
-  }
-  .dev-tools-popover-card {
-    bottom: 120px;
-    right: 14px;
-    width: calc(100vw - 28px);
-    max-width: 320px;
-  }
-}
-
