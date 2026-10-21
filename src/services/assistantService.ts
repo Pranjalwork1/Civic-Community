@@ -1,12 +1,14 @@
 /**
  * CivicSignal Assistant Service
- * Connects the frontend AI assistant drawer to the authenticated Python FastAPI backend
+ * Connects the frontend AI assistant drawer to the Python FastAPI backend
  * and Fetch.ai CivicSignal Coordinator Agent.
+ *
+ * Security Note:
+ * All backend API keys and agent credentials remain strictly server-side.
+ * In production on Vercel, requests route through the secure server-side proxy
+ * at `/api/assistant/chat`. In local development, requests connect to the local
+ * backend server at `http://localhost:8000/api/assistant/chat`.
  */
-
-const metaEnv = (import.meta as unknown as { env?: Record<string, string> })?.env;
-const BACKEND_BASE_URL = metaEnv?.VITE_BACKEND_URL || 'http://localhost:8000';
-const BACKEND_API_KEY = metaEnv?.VITE_BACKEND_API_KEY || 'civicsignal-local-secret-key-2026';
 
 export interface AssistantChatResponse {
   reply: string;
@@ -17,17 +19,34 @@ export interface AssistantChatResponse {
   timestamp?: string;
 }
 
+function resolveAssistantApiUrl(): string {
+  // If explicitly configured via Vite env, prioritize it
+  const metaEnv = (import.meta as unknown as { env?: Record<string, string> })?.env;
+  if (metaEnv?.VITE_BACKEND_URL) {
+    return `${metaEnv.VITE_BACKEND_URL.replace(/\/$/, '')}/api/assistant/chat`;
+  }
+
+  // If running in browser locally on Vite dev server (e.g. port 5173), direct to local Python backend
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'http://localhost:8000/api/assistant/chat';
+  }
+
+  // Production on Vercel: use relative URL routed through the secure server-side proxy
+  return '/api/assistant/chat';
+}
+
 export async function sendAssistantMessage(
   message: string,
   locality?: string,
   sessionId?: string
 ): Promise<string> {
+  const endpoint = resolveAssistantApiUrl();
+
   try {
-    const response = await fetch(`${BACKEND_BASE_URL}/api/assistant/chat`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${BACKEND_API_KEY}`,
       },
       body: JSON.stringify({
         message,
@@ -41,7 +60,7 @@ export async function sendAssistantMessage(
       return data.reply;
     }
   } catch {
-    // If backend server is currently offline or unreachable, use resilient local domain fallback
+    // If backend server is currently offline or sleeping, use resilient local domain fallback
   }
 
   // Graceful client fallback preserving zero downtime

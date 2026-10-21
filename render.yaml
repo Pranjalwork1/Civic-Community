@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: civicsignal-backend
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: python backend/run_backend.py
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: AGENT_NAME
+        value: civicsignal_coordinator
+      - key: AGENT_SEED
+        generateValue: true
+      - key: BACKEND_API_KEY
+        generateValue: true
+      - key: AGENT_ENDPOINT_URL
+        sync: false
+      - key: AGENT_MAILBOX
+        value: "false"
+      - key: AGENTVERSE_KEY
+        sync: false
+      - key: AGENTVERSE_URL
+        value: https://agentverse.ai
+      - key: ASI_ONE_API_KEY
+        sync: false
+      - key: ASI_ONE_BASE_URL
+        value: https://api.asi1.ai/v1
+      - key: ASI_ONE_MODEL
+        value: asi1-mini
+      - key: CORS_ORIGINS
+        value: https://civic-community-wine.vercel.app,http://localhost:5173

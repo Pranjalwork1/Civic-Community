@@ -1,143 +1,118 @@
-# CivicSignal Phase 3A: Backend & Fetch.ai Coordinator Agent
+# CivicSignal Backend & Fetch.ai Coordinator Agent Guide
 
-This directory contains the Python backend and Fetch.ai `uAgents` service for CivicSignal, implementing Phase 3A.
-
-## Architecture Overview
-
-- **Framework**: FastAPI (async REST API) + Fetch.ai `uAgents` v0.26+ + `uagents-core` v0.4+
-- **Agent**: `CivicSignal Coordinator Agent` (`civicsignal_coordinator`)
-- **Protocol**: Standard **Agent Chat Protocol** (`AgentChatProtocol:0.3.0`) with `publish_manifest=True`
-- **Messages**: Standard `ChatMessage`, `ChatAcknowledgement`, and `TextContent` models
-- **Mailbox**: Agentverse mailbox support for asynchronous routing and firewall traversal
-- **AI Intelligence**: Integrated with **ASI:One** (`https://api.asi1.ai/v1`) with resilient built-in coordinator domain knowledge
-- **Security**: Server-side environment variables for API keys, seed phrases, and tokens. Authenticated `/api/assistant/chat` endpoint protecting the agent from unauthorized client queries.
+This directory houses the production Python backend and autonomous agent implementation for **CivicSignal**, built using FastAPI, Fetch.ai's official `uAgents` framework, and the Agent Chat Protocol.
 
 ---
 
-## Directory Structure
+## 🧭 Why Agentverse Asks for "Agent Endpoint URL"
 
-```text
-backend/
-├── app/
-│   ├── __init__.py
-│   ├── config.py           # Loads settings from server-side .env
-│   ├── main.py             # FastAPI app with CORS, health checks, and /api/assistant/chat
-│   ├── auth.py             # Server-side Bearer token / API key validation
-│   ├── agent/
-│   │   ├── __init__.py
-│   │   ├── coordinator.py  # CivicSignal Coordinator Agent factory
-│   │   ├── asi_client.py   # ASI:One API integration & domain fallback logic
-│   │   └── protocol.py     # Agent Chat Protocol handlers (ChatMessage, ChatAcknowledgement)
-│   └── services/
-│       ├── __init__.py
-│       └── agent_service.py # Bridge service between FastAPI and Coordinator Agent
-├── tests/
-│   ├── __init__.py
-│   ├── test_agent_chat.py   # Test sending ChatMessage and receiving response via Chat Protocol
-│   └── test_api.py          # FastAPI test suite for authentication and chat endpoints
-├── run_backend.py          # Runs the FastAPI server (port 8000)
-├── run_agent.py            # Runs the standalone Coordinator Agent with Mailbox (port 8001)
-├── requirements.txt        # Python package dependencies
-├── .env.example            # Environment variables template
-└── README.md               # Setup instructions (this file)
-```
+When you choose **Agentverse → Launch an Agent → Connect Agent → Chat Protocol**, Agentverse is setting up a **Direct HTTP Webhook Integration**. 
+
+In this architecture:
+- Agentverse needs a public HTTPS URL where it can send incoming conversational messages and test readiness probes.
+- **Why `localhost` doesn't work:** Agentverse runs in the cloud; it cannot reach your laptop's private IP or local ports.
+- **Why the Vercel frontend URL doesn't work:** Vercel only hosts the React web application bundle, not a persistent Python process that implements the cryptographic Fetch.ai Agent Protocol.
+- **The Solution:** Deploy this Python backend to a free persistent hosting platform like **Render**. Render assigns a public HTTPS domain (e.g. `https://civicsignal-backend.onrender.com`).
+- **The Exact Endpoint URL to enter into Agentverse:**
+  ```text
+  https://<your-render-service-name>.onrender.com/submit
+  ```
+  *(The `/submit` path is the standard Fetch.ai protocol router implemented by `uagents.ASGIServer`).*
 
 ---
 
-## Setup & Installation
+## 🚀 Step-by-Step Render Deployment (Persistent Service)
 
-### 1. Prerequisites
-- Python 3.10+ (tested on Python 3.14)
-- Node.js & npm (for the React 19 frontend)
+### Step 1: Push Repository to GitHub
+Ensure all latest files (including `render.yaml`, `backend/`, and `api/`) are pushed to your GitHub repository `https://github.com/Pranjalwork1/Civic-Community`.
 
-### 2. Install Dependencies
-From the repository root or `backend/` directory:
-```bash
-pip install -r backend/requirements.txt
-```
+### Step 2: Create Web Service on Render
+1. Go to [https://dashboard.render.com](https://dashboard.render.com) and sign in.
+2. Click **New +** → **Web Service**.
+3. Connect your GitHub repository: `Pranjalwork1/Civic-Community`.
+4. Configure the Web Service settings:
+   - **Name:** `civicsignal-backend` (or your preferred name)
+   - **Region:** Any (e.g. Oregon, Frankfurt)
+   - **Branch:** `main`
+   - **Root Directory:** *(leave blank / default)*
+   - **Runtime:** `Python 3`
+   - **Build Command:** `pip install -r backend/requirements.txt`
+   - **Start Command:** `python backend/run_backend.py`
+   - **Plan:** Free
 
-### 3. Configure Environment Variables
-Copy `.env.example` to `.env`:
-```bash
-cp backend/.env.example backend/.env
-```
-Edit `backend/.env` with your credentials:
-```env
-# Backend server
-BACKEND_HOST=0.0.0.0
-BACKEND_PORT=8000
-BACKEND_API_KEY=civicsignal-local-secret-key-2026
+### Step 3: Configure Environment Variables on Render
+Under the **Environment** tab on Render, add:
+| Key | Example Value | Description |
+| :--- | :--- | :--- |
+| `PORT` | `10000` | Render assigns this automatically |
+| `AGENT_NAME` | `civicsignal_coordinator` | Agent identity name |
+| `AGENT_SEED` | *(Generate a secret phrase)* | Critical: Keeps agent address (`agent1q...`) constant |
+| `BACKEND_API_KEY` | *(Generate a random secret)* | Protects the assistant API endpoint |
+| `AGENT_ENDPOINT_URL` | `https://civicsignal-backend.onrender.com/submit` | Set after service URL is created |
+| `CORS_ORIGINS` | `https://civic-community-wine.vercel.app,http://localhost:5173` | Allows Vercel frontend |
+| `ASI_ONE_API_KEY` | *(Optional - from asi1.ai)* | LLM API key; domain fallback active if blank |
+| `ASI_ONE_MODEL` | `asi1-mini` | Default model |
 
-# Coordinator Agent
-AGENT_NAME=civicsignal_coordinator
-AGENT_SEED=civicsignal_coordinator_secure_production_seed_phrase_2026_gdg
-AGENT_PORT=8001
-
-# Agentverse Mailbox
-AGENT_MAILBOX=true
-AGENTVERSE_KEY=<your-agentverse-api-key>
-AGENTVERSE_URL=https://agentverse.ai
-
-# ASI:One API (Optional - domain knowledge fallback active if omitted)
-ASI_ONE_API_KEY=<your-asi1-api-key>
-ASI_ONE_BASE_URL=https://api.asi1.ai/v1
-ASI_ONE_MODEL=asi1-mini
-```
+Click **Save Changes** and deploy. Once deployment completes, your public URL will be live (e.g. `https://civicsignal-backend.onrender.com`).
 
 ---
 
-## Running the Application
+## 🤖 Connecting the Agent on Agentverse
 
-### 1. Run the FastAPI Backend Server
-```bash
-python backend/run_backend.py
-```
-- API Docs: `http://localhost:8000/docs`
-- Health Check: `http://localhost:8000/api/health`
-- Agent Info: `http://localhost:8000/api/agent/info`
+Now that your agent is live on Render:
 
-### 2. Run the Standalone Coordinator Agent with Mailbox
-```bash
-python backend/run_agent.py
-```
-This runs the coordinator agent with the published `AgentChatProtocol` manifest and connects it to the Agentverse mailbox.
+1. In Agentverse, navigate to **Launch an Agent** → **Connect Agent**.
+2. Select **Chat Protocol**.
+3. On the **Add your agent details** screen:
+   - **Agent Name:** `civicsignal_coordinator`
+   - **Agent Endpoint URL:** `https://<your-render-service-name>.onrender.com/submit`
+4. Click **Next / Verify**.
+   - Agentverse sends a `HEAD /submit` request to verify the server is live and returns `200 OK`.
+   - Agentverse retrieves the agent's published `AgentChatProtocol:0.3.0` manifest.
+5. Confirm the agent profile, avatar, and description.
+6. Click **Finish / Launch**.
 
-### 3. Run Automated Tests
+---
+
+## ⚡ Alternative Mode: Agentverse Mailbox (No Public URL Needed)
+
+If you do NOT want to host a public webhook endpoint:
+1. In Agentverse, go to **My Agents** → create a **Mailbox Agent**.
+2. Generate an **Agentverse Mailbox Key**.
+3. In `backend/.env` (or Render):
+   - Set `AGENT_MAILBOX=true`
+   - Set `AGENTVERSE_KEY=<your-agentverse-key>`
+   - Leave `AGENT_ENDPOINT_URL=` empty.
+4. Run `python backend/run_agent.py` locally or as a background worker.
+5. The agent will connect through Agentverse Mailbox polling automatically!
+
+---
+
+## 🔒 Frontend Security (Vercel Integration)
+
+The frontend assistant drawer does not expose any shared backend secret keys in client-side JavaScript.
+
+### How it works:
+1. In production, frontend requests are sent to the same-origin serverless proxy: `/api/assistant/chat`.
+2. The Vercel serverless function (`api/assistant/chat.js`) runs server-side on Vercel.
+3. In your **Vercel Project Settings** → **Environment Variables**, add:
+   - `BACKEND_URL`: `https://civicsignal-backend.onrender.com`
+   - `BACKEND_API_KEY`: *(Matches the BACKEND_API_KEY set on Render)*
+4. The serverless function attaches the `Authorization: Bearer <BACKEND_API_KEY>` header securely on the server side and forwards requests to Render.
+5. Client-side browser inspection reveals zero private tokens or credentials.
+
+---
+
+## 🧪 Local Testing & Verification
+
+Run all unit and integration tests locally:
 ```bash
 python -m unittest discover -s backend/tests -v
 ```
-All 8 test cases verify:
-- Coordinator agent initialization and cryptographic address format (`agent1q...`)
-- Full Agent Chat Protocol message flow: `ChatMessage` -> `ChatAcknowledgement` -> `ChatMessage` with `TextContent`
-- Domain knowledge responses (50-contributor threshold, streetlight evidence, electrical safety)
-- FastAPI authentication protection (401 on missing/invalid token, 200 on authorized token)
 
----
-
-## Authenticated API Usage
-
-Send a message from any authorized client:
-
-```bash
-curl -X POST http://localhost:8000/api/assistant/chat \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer civicsignal-local-secret-key-2026" \
-  -d '{
-    "message": "How does the 50-contributor threshold work?",
-    "locality": "Knowledge Park III"
-  }'
-```
-
-**Response**:
-```json
-{
-  "reply": "When 50 unique eligible neighbors independently report, corroborate (\"I Saw It\"), or add evidence to an incident, CivicSignal automatically unlocks a dedicated Incident Room. This consolidates all signals and assigns the original reporter as the community leader.",
-  "agent_name": "civicsignal_coordinator",
-  "agent_address": "agent1q0raqudlpe0kn6tefpuhn8kh3n8m80dlmzyuc2g2j6jgf8axalk2x0aj53g",
-  "protocol": "AgentChatProtocol:0.3.0",
-  "mailbox_enabled": false,
-  "msg_id": "716f6d5f-1bc0-4364-9bb4-20cb7e65e206",
-  "timestamp": "2026-10-21T18:59:00+00:00",
-  "session_id": "0381665e-213c-41ad-b6f7-c2901dbd5918"
-}
-```
+All 10 test cases verify:
+- Coordinator agent address initialization (`agent1q...`)
+- Real Agent Chat Protocol message loop: `ChatMessage` → `ChatAcknowledgement` → `ChatMessage(TextContent)`
+- Agentverse `/submit` readiness probe (`HEAD /submit` returns `200 OK`)
+- Authorized token and authorized CORS origin enforcement
+- Resilient domain knowledge response generation

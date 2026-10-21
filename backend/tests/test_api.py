@@ -14,6 +14,7 @@ class TestFastApiAssistantEndpoint(unittest.TestCase):
         self.assertEqual(data["status"], "healthy")
         self.assertEqual(data["agent"], "civicsignal_coordinator")
         self.assertTrue(data["agent_address"].startswith("agent1"))
+        self.assertIn("endpoint_url", data)
 
     def test_agent_info(self):
         response = client.get("/api/agent/info")
@@ -22,9 +23,18 @@ class TestFastApiAssistantEndpoint(unittest.TestCase):
         self.assertEqual(data["agent_name"], "civicsignal_coordinator")
         self.assertEqual(data["protocol_version"], "AgentChatProtocol:0.3.0")
         self.assertTrue(data["manifest_published"])
+        self.assertIn("endpoint_url", data)
+
+    def test_agentverse_submit_readiness_probe(self):
+        """
+        Agentverse Connect Agent wizard sends a HEAD /submit request
+        to verify that the agent endpoint is live and responsive.
+        """
+        response = client.head("/submit")
+        self.assertEqual(response.status_code, 200)
 
     def test_assistant_chat_unauthorized(self):
-        """Request without token must receive 401 Unauthorized."""
+        """Request without token and without allowed origin must receive 401 Unauthorized."""
         payload = {"message": "Hello Coordinator!"}
         response = client.post("/api/assistant/chat", json=payload)
         self.assertEqual(response.status_code, 401)
@@ -36,7 +46,7 @@ class TestFastApiAssistantEndpoint(unittest.TestCase):
         response = client.post("/api/assistant/chat", json=payload, headers=headers)
         self.assertEqual(response.status_code, 401)
 
-    def test_assistant_chat_authorized(self):
+    def test_assistant_chat_authorized_token(self):
         """Request with valid server-side token must succeed and return coordinator reply."""
         payload = {
             "message": "How does the 50-contributor threshold work?",
@@ -51,6 +61,19 @@ class TestFastApiAssistantEndpoint(unittest.TestCase):
         self.assertEqual(data["agent_name"], "civicsignal_coordinator")
         self.assertTrue(data["agent_address"].startswith("agent1"))
         self.assertEqual(data["protocol"], "AgentChatProtocol:0.3.0")
+
+    def test_assistant_chat_authorized_origin(self):
+        """Direct browser request with valid Vercel CORS Origin must succeed."""
+        payload = {
+            "message": "Explain petition signatures & leader review",
+            "locality": "Knowledge Park III",
+        }
+        headers = {"Origin": "https://civic-community-wine.vercel.app"}
+        response = client.post("/api/assistant/chat", json=payload, headers=headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("reply", data)
+        self.assertIn("Signature Campaign", data["reply"])
 
 if __name__ == "__main__":
     unittest.main()

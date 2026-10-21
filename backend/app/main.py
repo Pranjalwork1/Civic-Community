@@ -15,13 +15,26 @@ logging.basicConfig(
 )
 logger = logging.getLogger("civicsignal.backend")
 
+class AgentSubmitASGI:
+    """
+    ASGI sub-application proxy ensuring incoming Fetch.ai agent envelopes
+    hit the internal uAgent /submit ASGI handler.
+    """
+    def __init__(self, agent_server):
+        self.server = agent_server
+
+    async def __call__(self, scope, receive, send):
+        scope["path"] = "/submit"
+        await self.server(scope, receive, send)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initializing CivicSignal FastAPI Backend & Coordinator Agent Service...")
     # Initialize agent identity and verify address
     agent_addr = coordinator_service.address
     logger.info(f"CivicSignal Coordinator Agent online. Address: {agent_addr}")
-    logger.info(f"Agent Mailbox: {'Enabled (Agentverse)' if settings.AGENT_MAILBOX else 'Disabled'}")
+    logger.info(f"Agent Endpoint URL: {settings.AGENT_ENDPOINT_URL or 'Internal (auto-mounted at /submit)'}")
+    logger.info(f"Agent Mailbox: {'Enabled (Agentverse)' if settings.AGENT_MAILBOX and not settings.AGENT_ENDPOINT_URL else 'Disabled'}")
     logger.info(f"ASI:One API: {'Configured' if settings.ASI_ONE_API_KEY else 'Domain Fallback Active'}")
     yield
     logger.info("CivicSignal Backend shutting down.")
@@ -41,6 +54,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount the Fetch.ai uAgent submit router directly at /submit
+# This enables Agentverse and other external uAgents to send Chat Protocol envelopes directly to this web service
+app.mount("/submit", AgentSubmitASGI(coordinator_service.get_agent()._server))
 
 # Request / Response Schemas
 class AssistantChatRequest(BaseModel):
@@ -64,6 +81,7 @@ class AgentInfoResponse(BaseModel):
     protocol_version: str
     manifest_published: bool
     mailbox_enabled: bool
+    endpoint_url: str
     agentverse_url: str
     asi_one_connected: bool
     asi_one_model: str
@@ -77,7 +95,8 @@ async def health_check():
         "service": "CivicSignal Backend",
         "agent": settings.AGENT_NAME,
         "agent_address": coordinator_service.address,
-        "mailbox_enabled": settings.AGENT_MAILBOX,
+        "mailbox_enabled": settings.AGENT_MAILBOX and not bool(settings.AGENT_ENDPOINT_URL),
+        "endpoint_url": settings.AGENT_ENDPOINT_URL or "/submit",
         "protocol": "AgentChatProtocol:0.3.0",
     }
 
@@ -89,7 +108,8 @@ async def get_agent_info():
         agent_address=coordinator_service.address,
         protocol_version="AgentChatProtocol:0.3.0",
         manifest_published=True,
-        mailbox_enabled=settings.AGENT_MAILBOX,
+        mailbox_enabled=settings.AGENT_MAILBOX and not bool(settings.AGENT_ENDPOINT_URL),
+        endpoint_url=settings.AGENT_ENDPOINT_URL or "/submit",
         agentverse_url=settings.AGENTVERSE_URL,
         asi_one_connected=bool(settings.ASI_ONE_API_KEY),
         asi_one_model=settings.ASI_ONE_MODEL,
