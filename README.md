@@ -91,6 +91,39 @@ npm run preview
 
 ---
 
+## 🤖 Phase 3A: Backend & Fetch.ai Coordinator Agent
+
+CivicSignal includes a Python backend and autonomous agent service using Fetch.ai's `uAgents` framework, Agent Chat Protocol, and ASI:One integration:
+
+### 1. Install Backend Dependencies
+```bash
+pip install -r backend/requirements.txt
+```
+
+### 2. Configure Environment
+```bash
+cp backend/.env.example backend/.env
+```
+
+### 3. Run FastAPI Backend Server
+```bash
+python backend/run_backend.py
+```
+- API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+- Health Check: [http://localhost:8000/api/health](http://localhost:8000/api/health)
+
+### 4. Run Standalone Coordinator Agent
+```bash
+python backend/run_agent.py
+```
+
+### 5. Run Backend & Agent Test Suite
+```bash
+python -m unittest discover -s backend/tests -v
+```
+
+---
+
 ## 📄 License
 
 MIT

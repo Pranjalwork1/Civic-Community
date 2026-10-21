@@ -11,14 +11,24 @@ dist/
 .env
 .env.local
 .env.*.local
+*.env
+*.env.local
+!.env.example
+!backend/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.venv/
+venv/
 
 # IDE & OS files
 .DS_Store
 Thumbs.db
 *.log
-
-.vercel
-.env*
 
 # Reference images
 broken.png

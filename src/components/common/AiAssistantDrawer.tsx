@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { useCivic } from '../../context/CivicContext';
 
+import { sendAssistantMessage } from '../../services/assistantService';
+
 interface AiAssistantDrawerProps {
   isOpen: boolean;
   onToggle: () => void;
@@ -36,7 +38,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({ isOpen, on
     'Explain petition signatures & leader review',
   ];
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const text = (textToSend || inputValue).trim();
     if (!text) return;
 
@@ -46,23 +48,11 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({ isOpen, on
       time: 'Just now',
     };
 
-    let reply = '';
-    const lower = text.toLowerCase();
-    if (lower.includes('50') || lower.includes('threshold') || lower.includes('room')) {
-      reply =
-        'When 50 unique eligible neighbors independently report, corroborate ("I Saw It"), or add evidence to an incident, CivicSignal automatically unlocks a dedicated Incident Room. This consolidates all signals and assigns the original reporter as the community leader.';
-    } else if (lower.includes('streetlight') || lower.includes('light')) {
-      reply =
-        'For streetlights: 1. Take a wide-angle photo showing the pole and street context. 2. Capture the pole number or landmark. 3. Tag whether it has been dark for multiple nights. CivicSignal geotags your coordinates automatically.';
-    } else if (lower.includes('electrical') || lower.includes('hazard') || lower.includes('wire')) {
-      reply =
-        'SAFETY FIRST: Never approach hanging wires, sparking transformers, or waterlogged electrical poles. Photograph from at least 10 meters away. Our system flags these as "Urgent Safety Concerns" for immediate escalation.';
-    } else if (lower.includes('petition') || lower.includes('signature') || lower.includes('leader')) {
-      reply =
-        'Once an Incident Room reaches 100 members, a collective Signature Campaign begins. Members sign securely, and the Community Leader must give explicit approval before the formal complaint document is submitted to municipal authorities.';
-    } else {
-      reply = `Thank you for asking. Based on active reports in ${selectedLocation?.locality || 'your locality'}, you can submit geotagged evidence directly via the "Create Report" button. Would you like me to open the reporting wizard for you?`;
-    }
+    setMessages((prev) => [...prev, userMsg]);
+    if (!textToSend) setInputValue('');
+
+    const locality = selectedLocation?.locality || 'Knowledge Park III';
+    const reply = await sendAssistantMessage(text, locality);
 
     const aiMsg = {
       sender: 'ai' as const,
@@ -70,8 +60,7 @@ export const AiAssistantDrawer: React.FC<AiAssistantDrawerProps> = ({ isOpen, on
       time: 'Just now',
     };
 
-    setMessages((prev) => [...prev, userMsg, aiMsg]);
-    if (!textToSend) setInputValue('');
+    setMessages((prev) => [...prev, aiMsg]);
   };
 
   return (
