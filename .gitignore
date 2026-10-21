@@ -19,3 +19,8 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Reference images
+broken.png
+target.png
+current.png
